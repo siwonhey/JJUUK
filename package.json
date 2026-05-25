@@ -35,14 +35,14 @@
     ],
     "mac": {
       "category": "public.app-category.healthcare-fitness",
-      "icon": "assets/tray/icon@2x.png",
+      "icon": "assets/app-icon.png",
       "extendInfo": {
         "NSCameraUsageDescription": "JJUUK 은 자세 변화를 감지하기 위해 카메라 영상을 사용합니다. 영상은 로컬에서만 처리되며 외부로 전송되지 않습니다."
       }
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/tray/icon@2x.png"
+      "icon": "assets/app-icon.png"
     }
   }
 }
