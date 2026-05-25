@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' blob: data: file:;
+                 script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: file:;
+                 worker-src 'self' blob:;
+                 img-src 'self' data: blob:;
+                 font-src 'self' file: data:;
+                 media-src 'self' blob:;
+                 connect-src 'self' blob: file:;" />
+  <link rel="stylesheet" href="../../node_modules/pretendard/dist/web/static/pretendard.css" />
+  <title>JJUUK 자세 측정</title>
+  <style>
+    /* Apple-styled palette — Pretendard substituted for SF Pro. Key color: green. */
+    :root {
+      --canvas: #ffffff;
+      --canvas-parchment: #f5f5f7;
+      --ink: #1d1d1f;
+      --ink-muted: #6e6e73;
+      --ink-muted-soft: #86868b;
+      --primary: #2fa46a;
+      --primary-focus: #248256;
+      --primary-soft: rgba(47, 164, 106, 0.10);
+      --hairline: #d2d2d7;
+      --guide: #d2d2d7;
+      --success: #2fa46a;
+      --danger: #d93b3b;
+      --warn: #b97a17;
+      --preview-bg: #000000;
+      --preview-shadow: 0 3px 5px rgba(0, 0, 0, 0.04), 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    body.dark {
+      --canvas: #1d1d1f;
+      --canvas-parchment: #161617;
+      --ink: #f5f5f7;
+      --ink-muted: #a1a1a6;
+      --ink-muted-soft: #86868b;
+      --primary: #4ade80;
+      --primary-focus: #4ade80;
+      --primary-soft: rgba(74, 222, 128, 0.16);
+      --hairline: #3a3a3c;
+      --guide: #48484a;
+      --success: #4ade80;
+      --danger: #ff6961;
+      --warn: #f5a623;
+      --preview-bg: #000000;
+      --preview-shadow: 0 3px 5px rgba(0, 0, 0, 0.2), 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: 'Pretendard', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .wrap {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 40px 20px;   /* 위쪽 40 / 아래는 버튼을 끌어올리며 더 축소 */
+      gap: 0;
+    }
+
+    /* ── header ─────────────────────────────────────────────── */
+    .header {
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 18px;       /* header → preview 간격 (기존 톤 유지) */
+    }
+    .title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.022em;
+      line-height: 1.12;
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      letter-spacing: -0.012em;
+      line-height: 1.4;
+      margin: 0;
+      min-height: 22px;
+    }
+    .subtitle.success { color: var(--success); font-weight: 500; }
+    .subtitle.warning { color: var(--warn);    font-weight: 500; }
+
+    /* ── stage (preview + face guide) ───────────────────────── */
+    .stage {
+      width: 100%;
+      max-width: 640px;
+      align-self: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--preview-bg);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--preview-shadow);
+    }
+    #cam, #frozenFrame {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    #frozenFrame[hidden] { display: none; }
+
+    .face-guide {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 28%;                       /* 살짝 축소 (32 → 28) */
+      aspect-ratio: 1 / 1;
+      border: 3px solid var(--guide);
+      border-radius: 14px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.18);
+      transition: border-color 0.15s ease;
+    }
+    .face-guide.inside  { border-color: var(--success); }
+    .face-guide.outside { border-color: var(--danger); }
+
+    .progress-bar {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 4px;
+      background: rgba(255,255,255,0.15);
+    }
+    .progress-fill {
+      height: 100%; width: 0%;
+      background: var(--primary);
+      transition: width 0.1s linear;
+    }
+
+    /* ── footer (messages + actions) — 카메라 바로 아래에 붙도록 ── */
+    .footer {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;        /* messages ↔ actions */
+      margin-top: 6px; /* preview → footer */
+    }
+    .messages {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* 평상시(한 줄) 기준 — 측정 중 두 줄로 늘어나는 건 버튼이 숨겨진 상태라 무방 */
+      min-height: 22px;
+      gap: 2px;
+    }
+    #status {
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: -0.012em;
+      line-height: 1.42;
+      color: var(--ink-muted);
+      text-align: center;
+      min-height: 20px;
+      margin: 0;
+    }
+    #status.ready   { color: var(--success); font-weight: 500; }
+    #status.error   { color: var(--danger);  font-weight: 500; }
+    #status.outside { color: var(--danger);  font-weight: 500; }
+    #subMessage {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+      color: var(--success);
+      text-align: center;
+      /* 비었을 때는 자리를 차지하지 않음 — 측정 중에만 한 줄 추가 */
+      min-height: 0;
+      margin: 0;
+    }
+    #subMessage.warning { color: var(--danger); font-weight: 500; }
+    .progress-fill.warning { background: var(--danger); }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 400;
+      letter-spacing: -0.012em;
+      line-height: 1;
+      padding: 12px 28px;
+      border-radius: 9999px;          /* pill */
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.06s ease, opacity 0.15s ease;
+      min-width: 132px;
+      text-align: center;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--primary-focus);
+      outline-offset: 2px;
+    }
+    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .btn.primary:hover:not(:disabled)  { background: var(--primary-focus); }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn.secondary:hover:not(:disabled) { background: var(--primary-soft); }
+    /* 측정 실패(invalid) 상태에서 다시 찍기를 빨간색 톤으로 강조 */
+    .btn.secondary.danger {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+    .btn.secondary.danger:hover:not(:disabled) { background: rgba(217, 59, 59, 0.10); }
+    body.dark .btn.secondary.danger:hover:not(:disabled) { background: rgba(255, 105, 97, 0.16); }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <h1 class="title">바른 자세를 기억해 둘게요</h1>
+      <p class="subtitle">박스 안에 얼굴이 들어오도록 편하게 앉아주세요</p>
+    </header>
+
+    <div class="stage">
+      <div class="preview">
+        <video id="cam" autoplay playsinline muted></video>
+        <canvas id="frozenFrame" hidden></canvas>
+        <div id="faceGuide" class="face-guide"></div>
+        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="messages">
+        <div id="status">준비하는 중이에요…</div>
+        <div id="subMessage"></div>
+      </div>
+      <div class="actions">
+        <button id="startBtn" class="btn primary" disabled>측정 시작</button>
+        <button id="retakeBtn" class="btn secondary" hidden>다시 찍기</button>
+        <button id="confirmBtn" class="btn primary" hidden>이대로 좋아요</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="detector.js"></script>
+</body>
+</html>

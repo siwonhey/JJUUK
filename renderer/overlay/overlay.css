@@ -1,0 +1,82 @@
+/* 투명 오버레이 — 클릭은 OS 차원에서 통과 (main 에서 setIgnoreMouseEvents) */
+html, body {
+  margin: 0; padding: 0;
+  width: 100vw; height: 100vh;
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+img { -webkit-user-drag: none; pointer-events: none; }
+
+/* ─── 거북이: 화면 전체 폭(100vw) — 오른쪽 밖에서 슬라이드 인 ─────── */
+.turtle-stage {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+.turtle-slider {
+  transform: translateX(110%);
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.turtle-slider.visible {
+  transform: translateX(0);
+}
+.turtle-bobber {
+  animation: turtle-bob 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+.turtle-img {
+  width: 90vw;
+  max-height: 85vh;
+  /* 디자인별 원본 비율이 달라도(특히 lowpoly 는 정사각) 같은 박스에 표시되도록 강제 */
+  aspect-ratio: 3 / 2;
+  display: block;
+  object-fit: contain;
+}
+
+@keyframes turtle-bob {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(-22px, -28px) rotate(-1.8deg); }
+}
+
+/* ─── 기린: 폭 60vw — 하단에서 위로 슬라이드 업 ─────────────── */
+.giraffe-stage {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.giraffe-slider {
+  transform: translateY(105%);
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.giraffe-slider.visible {
+  transform: translateY(0);
+}
+.giraffe-bobber {
+  animation: giraffe-sway 5s ease-in-out infinite;
+  transform-origin: bottom center;
+  will-change: transform;
+}
+.giraffe-img {
+  width: 60vw;
+  max-height: 95vh;
+  aspect-ratio: 2 / 3;
+  display: block;
+  object-fit: contain;
+}
+
+@keyframes giraffe-sway {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  50%      { transform: rotate(-1.2deg) translateX(-10px); }
+}

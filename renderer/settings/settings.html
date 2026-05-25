@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; font-src 'self' file: data:; img-src 'self' file: data: ../../;" />
+  <link rel="stylesheet" href="../../node_modules/pretendard/dist/web/static/pretendard.css" />
+  <title>JJUUK 설정</title>
+  <style>
+    /* 말풍선 화살표 위치를 부드럽게 움직이려면 CSS 변수를 등록해야 함.
+       inherits: true 여야 .bubble 에 설정한 값이 ::before 까지 내려간다. */
+    @property --arrow-x {
+      syntax: '<length-percentage>';
+      inherits: true;
+      initial-value: 50%;
+    }
+
+    /* ───── 테마 변수 — Apple 디자인 팔레트 (Pretendard) ───── */
+    :root {
+      --bg: #ffffff;
+      --text-strong: #1d1d1f;
+      --text-sub: #6e6e73;
+      --text-muted: #86868b;
+      --border: #d2d2d7;
+      --border-soft: #e8e8ed;
+      --hover-bg: #f5f5f7;
+      --bubble-bg: #f5f5f7;
+      --bubble-text: #424245;
+      --switch-off: #d2d2d7;
+      --switch-off-hover: #c4c4c9;
+      --switch-on: #2fa46a;
+      --accent: #2fa46a;
+      --accent-focus: #248256;
+      --select-bg: #ffffff;
+      --select-border: #d2d2d7;
+      --select-border-hover: #86868b;
+      --select-arrow: '%2386868b';
+      --preview-bg: #f5f5f7;
+      --scrollbar-thumb: rgba(0, 0, 0, 0.28);
+      --scrollbar-thumb-hover: rgba(0, 0, 0, 0.48);
+    }
+    body.dark {
+      --bg: #1d1d1f;
+      --text-strong: #f5f5f7;
+      --text-sub: #a1a1a6;
+      --text-muted: #86868b;
+      --border: #3a3a3c;
+      --border-soft: #2c2c2e;
+      --hover-bg: #2c2c2e;
+      --bubble-bg: #2c2c2e;
+      --bubble-text: #d2d2d7;
+      --switch-off: #48484a;
+      --switch-off-hover: #58585a;
+      --switch-on: #4ade80;
+      --accent: #4ade80;
+      --accent-focus: #4ade80;
+      --select-bg: #2c2c2e;
+      --select-border: #3a3a3c;
+      --select-border-hover: #58585a;
+      --select-arrow: '%23a1a1a6';
+      --preview-bg: #2c2c2e;
+      --scrollbar-thumb: rgba(255, 255, 255, 0.28);
+      --scrollbar-thumb-hover: rgba(255, 255, 255, 0.48);
+    }
+
+    html, body {
+      margin: 0; padding: 0;
+      font-family: 'Pretendard', 'Pretendard Variable', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-strong);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    /* 윈도우(html) 자체가 스크롤 — 박스 내부 스크롤 X */
+    html {
+      height: 100%;
+      overflow-y: auto;
+      /* 스크롤이 생겨도 콘텐츠가 좌우로 흔들리지 않도록 */
+      scrollbar-gutter: stable;
+    }
+    body {
+      min-height: 100%;
+    }
+    .modal {
+      display: flex;
+      flex-direction: column;
+    }
+    .body-wrap {
+      padding: 32px 28px 28px;
+    }
+
+    /* 스크롤바 — 윈도우 우측 가장자리에 얇은 thumb 만 (light/dark 자동) */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 5px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      min-height: 32px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+      background-clip: padding-box;
+    }
+
+    /* ───── 섹션 ───── */
+    .section { padding: 4px 0; }
+    .section-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .section-text { flex: 1; min-width: 0; }
+    .section-label {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-strong);
+      margin: 0 0 5px 0;
+      letter-spacing: -0.022em;
+      line-height: 1.24;
+    }
+    .section-sub {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin: 0;
+      line-height: 1.47;
+      letter-spacing: -0.008em;
+    }
+    .section-divider {
+      margin: 24px 0;
+      height: 1px;
+      background: var(--border-soft);
+    }
+    .section.clickable {
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin: -6px -12px;
+      transition: background 0.12s ease;
+    }
+    .section.clickable:hover { background: var(--hover-bg); }
+    .chevron {
+      color: var(--text-muted);
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* ───── 민감도 슬라이더 ───── */
+    .slider-block { margin-top: 18px; }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      font-weight: 500;
+      letter-spacing: -0.008em;
+    }
+    .slider-labels span.active { color: var(--accent); font-weight: 600; }
+
+    /* ───── 말풍선 ───── */
+    .bubble {
+      position: relative;
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: var(--bubble-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--bubble-text);
+      line-height: 1.5;
+      letter-spacing: -0.008em;
+    }
+    .bubble::before {
+      content: '';
+      position: absolute;
+      top: -7px;
+      left: var(--arrow-x);
+      width: 12px;
+      height: 12px;
+      background: var(--bubble-bg);
+      border-top: 1px solid var(--border-soft);
+      border-left: 1px solid var(--border-soft);
+      transform: translateX(-50%) rotate(45deg);
+      transition: left 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                  --arrow-x 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ───── 캐릭터 디자인 ───── */
+    .design-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .design-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-color: var(--select-bg);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%2386868b' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 12px 8px;
+      border: 1px solid var(--select-border);
+      border-radius: 9999px;
+      padding: 10px 38px 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-strong);
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: -0.012em;
+      min-width: 144px;
+      transition: background-color 0.2s, border-color 0.15s, color 0.2s;
+    }
+    .design-select:hover { border-color: var(--select-border-hover); }
+    .design-select:focus { outline: none; border-color: var(--accent); }
+
+    /* 프리뷰 — 거북이/기린 나란히 */
+    .preview-card {
+      margin-top: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--border-soft);
+      background: var(--preview-bg);
+      padding: 20px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .preview-character {
+      object-fit: contain;
+      display: block;
+    }
+    .preview-character.turtle  { width: 52%; aspect-ratio: 3 / 2; }
+    .preview-character.giraffe { width: 30%; aspect-ratio: 2 / 3; }
+
+    /* ───── gooey 토글 (메뉴와 동일) ───── */
+    .switch {
+      position: relative;
+      display: block;
+      width: 52px;
+      height: 32px;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+    }
+    .switch input {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      border: none;
+      border-radius: 999px;
+      background: var(--switch-off);
+      outline: none;
+      transition: background 0.5s ease;
+    }
+    .switch input:hover { background: var(--switch-off-hover); }
+    .switch input:checked { background: var(--switch-on); }
+    .switch-svg {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      fill: #fff;
+    }
+    .switch-svg circle {
+      transition: transform 0.5s ease;
+      -webkit-backface-visibility: hidden;
+              backface-visibility: hidden;
+    }
+    .circle-off { transform-origin: 16px 16px; transform: translateX(0)    scale(1); }
+    .circle-on  { transform-origin: 36px 16px; transform: translateX(-12px) scale(0); }
+    .switch input:checked + .switch-svg .circle-off {
+      transform: translateX(12px) scale(0);
+    }
+    .switch input:checked + .switch-svg .circle-on {
+      transform: translateX(0)    scale(1);
+    }
+    .drop { opacity: 0; }
+    .switch input:checked + .switch-svg .drop {
+      animation: drop-fall 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes drop-fall {
+      0%   { transform: translateY(0);    opacity: 1; }
+      80%  { transform: translateY(20px); opacity: 1; }
+      100% { transform: translateY(22px); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- goo 필터 (메뉴와 공유되는 SVG 정의) -->
+  <svg style="position: fixed; width: 0; height: 0;">
+    <defs>
+      <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+        <feColorMatrix in="blur" mode="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="modal">
+    <div class="body-wrap">
+
+      <!-- 0. 캐릭터 디자인 -->
+      <section class="section">
+        <div class="design-row">
+          <div class="section-text">
+            <h3 class="section-label">캐릭터 디자인</h3>
+            <p class="section-sub">화면에 등장할 거북이/기린 스타일을 골라보세요.</p>
+          </div>
+          <select id="design-select" class="design-select">
+            <option value="realistic">Realistic</option>
+            <option value="clay">Clay</option>
+            <option value="cube">Blocky</option>
+            <option value="lowpoly">Low Poly</option>
+          </select>
+        </div>
+
+        <div class="preview-card">
+          <img id="preview-turtle"  class="preview-character turtle"  alt="" />
+          <img id="preview-giraffe" class="preview-character giraffe" alt="" />
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- 1. 감지 민감도 -->
+      <section class="section">
+        <div class="section-row">
+          <div class="section-text">
+            <h3 class="section-label">감지 민감도</h3>
+            <p class="section-sub">자세가 어느 정도 흐트러졌을 때 알려드릴지 정해주세요.</p>
+          </div>
+        </div>
+        <div class="slider-block">
+          <input id="slider" type="range" min="1" max="3" step="1" value="2" />
+          <div class="slider-labels">
+            <span data-level="1">여유롭게</span>
+            <span data-level="2">보통</span>
+            <span data-level="3">꼼꼼하게</span>
+          </div>
+        </div>
+        <div id="desc" class="bubble"></div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- 2. 자동 실행 -->
+      <section class="section">
+        <div class="section-row">
+          <div class="section-text">
+            <h3 class="section-label">컴퓨터 켤 때 자동 실행</h3>
+            <p class="section-sub">전원을 켜면 JJUUK가 알아서 트레이에 자리잡아요.</p>
+          </div>
+          <label class="switch">
+            <input id="open-at-login" type="checkbox" />
+            <svg class="switch-svg" viewBox="0 0 52 32" filter="url(#goo)">
+              <circle class="circle-off" cx="16" cy="16" r="10" />
+              <circle class="circle-on"  cx="36" cy="16" r="10" />
+              <circle class="drop"       cx="35" cy="-1" r="2.5" />
+            </svg>
+          </label>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- 3. 다크 모드 -->
+      <section class="section">
+        <div class="section-row">
+          <div class="section-text">
+            <h3 class="section-label">다크 모드</h3>
+            <p class="section-sub">화면이 눈에 편한 어두운 톤으로 바뀌어요.</p>
+          </div>
+          <label class="switch">
+            <input id="dark-mode" type="checkbox" />
+            <svg class="switch-svg" viewBox="0 0 52 32" filter="url(#goo)">
+              <circle class="circle-off" cx="16" cy="16" r="10" />
+              <circle class="circle-on"  cx="36" cy="16" r="10" />
+              <circle class="drop"       cx="35" cy="-1" r="2.5" />
+            </svg>
+          </label>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- 4. 재측정 -->
+      <section id="recalibrate-btn" class="section clickable">
+        <div class="section-row">
+          <div class="section-text">
+            <h3 class="section-label">내 자세 다시 측정하기</h3>
+            <p class="section-sub">현재 자세를 새 기준으로 다시 기록해요.</p>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

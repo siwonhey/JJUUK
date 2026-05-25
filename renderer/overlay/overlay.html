@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' blob: data:; script-src 'self' 'unsafe-inline' blob:; img-src 'self' file: data: blob: ../../;" />
+  <title>JJUUK Overlay</title>
+  <link rel="stylesheet" href="overlay.css" />
+</head>
+<body>
+  <!-- 거북이: 오른쪽 밖 → 우측 중앙으로 헤엄쳐 등장 -->
+  <div class="turtle-stage">
+    <div class="turtle-slider">
+      <div class="turtle-bobber">
+        <img id="turtle-img" class="turtle-img" src="../../assets/characters/realistic/turtle.png" alt="" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 기린: 아래쪽 밖에서 점점 위로 슬라이드 업 -->
+  <div class="giraffe-stage">
+    <div class="giraffe-slider">
+      <div class="giraffe-bobber">
+        <img id="giraffe-img" class="giraffe-img" src="../../assets/characters/realistic/giraffe.png" alt="" />
+      </div>
+    </div>
+  </div>
+
+  <script src="overlay.js"></script>
+</body>
+</html>
