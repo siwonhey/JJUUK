@@ -30,6 +30,7 @@
       --switch-on: #2fa46a;
       --accent: #2fa46a;
       --accent-focus: #248256;
+      --slider-track: #e8e8ed;
       --select-bg: #ffffff;
       --select-border: #d2d2d7;
       --select-border-hover: #86868b;
@@ -53,6 +54,7 @@
       --switch-on: #4ade80;
       --accent: #4ade80;
       --accent-focus: #4ade80;
+      --slider-track: #48484a;
       --select-bg: #2c2c2e;
       --select-border: #3a3a3c;
       --select-border-hover: #58585a;
@@ -90,23 +92,6 @@
     .body-wrap {
       padding: 32px 28px 28px;
     }
-
-    /* ───── 앱 로고 헤더 ───── */
-    .app-header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 28px;
-    }
-    .app-logo {
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-      display: block;
-      transition: filter 0.2s;
-    }
-    /* 로고가 검정 단색 PNG 라 다크 모드에서는 invert 로 흰 실루엣 처리 */
-    body.dark .app-logo { filter: invert(1); }
 
     /* 스크롤바 — 윈도우 우측 가장자리에 얇은 thumb 만 (light/dark 자동) */
     ::-webkit-scrollbar { width: 10px; }
@@ -169,10 +154,38 @@
 
     /* ───── 민감도 슬라이더 ───── */
     .slider-block { margin-top: 18px; }
+    /* 기본 accent-color 는 Chromium 이 unfilled 영역을 시스템 기본 톤으로 그려서
+       라이트 모드에서도 어둡게 보이는 문제가 있어 트랙을 명시적으로 다시 그림. */
     input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
       width: 100%;
-      accent-color: var(--accent);
+      background: transparent;
       cursor: pointer;
+      outline: none;
+      height: 18px; /* 썸 클릭 영역 확보 */
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 4px;
+      background: var(--slider-track);
+      border-radius: 2px;
+      border: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      margin-top: -7px;       /* 4px 트랙 가운데 정렬 */
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      transition: background 0.15s;
+    }
+    input[type=range]:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 4px var(--bubble-bg);
     }
     .slider-labels {
       display: flex;
@@ -334,11 +347,6 @@
 
   <div class="modal">
     <div class="body-wrap">
-
-      <!-- 앱 로고 헤더 -->
-      <header class="app-header">
-        <img class="app-logo" src="../../assets/app-icon.png" alt="JJUUK" />
-      </header>
 
       <!-- 0. 캐릭터 디자인 -->
       <section class="section">
