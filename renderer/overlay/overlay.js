@@ -8,7 +8,7 @@ let currentState = 'good';
 
 function setDesign(design) {
   // 잘못된 값이 와도 깨지지 않게 realistic 로 폴백
-  const safe = ['realistic', 'clay', 'cube', 'lowpoly'].includes(design) ? design : 'realistic';
+  const safe = ['realistic', 'clay', 'cube', 'lowpoly', 'mommy'].includes(design) ? design : 'realistic';
   turtleImg.src = `../../assets/characters/${safe}/turtle.png`;
   giraffeImg.src = `../../assets/characters/${safe}/giraffe.png`;
 }

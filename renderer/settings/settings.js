@@ -28,7 +28,7 @@ const designSelect = document.getElementById('design-select');
 const previewTurtle  = document.getElementById('preview-turtle');
 const previewGiraffe = document.getElementById('preview-giraffe');
 
-const VALID_DESIGNS = ['realistic', 'clay', 'cube', 'lowpoly'];
+const VALID_DESIGNS = ['realistic', 'clay', 'cube', 'lowpoly', 'mommy'];
 
 function applyDesignPreview(design) {
   const safe = VALID_DESIGNS.includes(design) ? design : 'realistic';

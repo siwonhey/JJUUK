@@ -3,7 +3,7 @@ const path = require('path');
 const Store = require('electron-store');
 const { SENSITIVITY_PRESETS } = require('../shared/config');
 
-const CHARACTER_DESIGNS = ['realistic', 'clay', 'cube', 'lowpoly'];
+const CHARACTER_DESIGNS = ['realistic', 'clay', 'cube', 'lowpoly', 'mommy'];
 const DEFAULT_CHARACTER_DESIGN = 'realistic';
 const THEMES = ['light', 'dark'];
 const DEFAULT_THEME = 'light';
