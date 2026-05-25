@@ -91,6 +91,23 @@
       padding: 32px 28px 28px;
     }
 
+    /* ───── 앱 로고 헤더 ───── */
+    .app-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .app-logo {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      display: block;
+      transition: filter 0.2s;
+    }
+    /* 로고가 검정 단색 PNG 라 다크 모드에서는 invert 로 흰 실루엣 처리 */
+    body.dark .app-logo { filter: invert(1); }
+
     /* 스크롤바 — 윈도우 우측 가장자리에 얇은 thumb 만 (light/dark 자동) */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -317,6 +334,11 @@
 
   <div class="modal">
     <div class="body-wrap">
+
+      <!-- 앱 로고 헤더 -->
+      <header class="app-header">
+        <img class="app-logo" src="../../assets/app-icon.png" alt="JJUUK" />
+      </header>
 
       <!-- 0. 캐릭터 디자인 -->
       <section class="section">

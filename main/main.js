@@ -113,7 +113,7 @@ function createSettingsWindow() {
     minimizable: false,
     maximizable: false,
     title: 'JJUUK 설정',
-    icon: path.join(__dirname, '..', 'assets', 'characters', 'realistic', 'turtle.png'),
+    icon: path.join(__dirname, '..', 'assets', 'app-icon.png'),
     // 첫 페인트가 흰색으로 깜빡이지 않도록 저장된 테마 기준으로 초기 배경 선택
     backgroundColor: store.get('theme') === 'dark' ? '#161616' : '#ffffff',
     webPreferences: {
