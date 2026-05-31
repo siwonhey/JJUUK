@@ -14,10 +14,10 @@ const MEASURE_MS = 3000;
 const CALIB_VALID_RATIO = 0.7;
 // bad → good 복귀 직후 다른 캐릭터가 곧바로 튀어나오지 않게 막는 쿨다운
 const RECOVERY_COOLDOWN_MS = 3000;
-// 거북목 정의 보정: 폭은 늘었지만 Y 중심은 거의 안 변할 때만 거북목.
-// 폭+Y 가 동시에 크게 변하면 "단순 다가가기/굽은 등" 으로 판단해 slouch 로 양보.
-// shared/config.js TURTLE_NECK_Y_TOLERANCE_FACTOR 와 의미 동일.
-const TURTLE_NECK_Y_TOLERANCE_FACTOR = 0.6;
+// 폭이 임계치 이상으로 늘었으면 일단 거북목으로 판정.
+// Y 가 임계치의 1.5 배 이상 압도적으로 클 때만 slouch 가 우위 (몸이 확연히 무너진 경우).
+// shared/config.js SLOUCH_OVERRIDE_FACTOR 와 의미 동일.
+const SLOUCH_OVERRIDE_FACTOR = 1.5;
 // 캘리브레이션 표본의 분산이 이 값을 넘으면 baseline 무효 처리 (자세가 흔들렸다는 신호)
 const CALIB_MAX_FACE_WIDTH_STDDEV = 0.025;
 
@@ -606,17 +606,17 @@ function evaluate(m, ts) {
   const widthRatio = m.faceWidth / baseline.faceWidth;
   const yDelta = m.faceY - baseline.faceY;
 
-  // 거북목은 "폭만 늘고 Y는 비교적 안정" 일 때만 인정.
-  // 폭+Y 가 둘 다 늘면 단순 다가가기/굽은 등으로 봐서 slouch 에 양보 →
-  // 두 신호가 동시에 켜져도 기린이 한 번씩은 나오게 됨 (이전: 거북이 영원 우세 문제).
+  // 폭이 임계치 이상 늘었으면 우선 거북목.
+  // Y 도 같이 살짝 늘어나는 것은 거북목 자세에서 흔한 동반 현상이라 여유를 둠.
+  // 다만 Y 가 임계치 1.5배 이상으로 압도적이면(=몸이 명확히 무너짐) slouch 가 이김.
   let raw = 'good';
-  if (yDelta >= threshold.faceYDelta) {
-    raw = 'slouch';
-  } else if (
+  if (
     widthRatio >= threshold.faceWidthRatio &&
-    yDelta < threshold.faceYDelta * TURTLE_NECK_Y_TOLERANCE_FACTOR
+    yDelta < threshold.faceYDelta * SLOUCH_OVERRIDE_FACTOR
   ) {
     raw = 'turtle-neck';
+  } else if (yDelta >= threshold.faceYDelta) {
+    raw = 'slouch';
   }
 
   if (lastState !== 'good' && raw === 'good') {

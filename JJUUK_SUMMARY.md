@@ -345,3 +345,91 @@ JJUUK(쭉) 은 웹캠으로 사용자의 자세를 실시간 감지해 거북목
 주요 기능으로는 3초 캘리브레이션, 실시간 자세 감지와 캐릭터 오버레이, 트레이 좌클릭의 gooey 토글 팝업과 우클릭의 네이티브 컨텍스트 메뉴, 멀티 모니터 자동 대응(디스플레이 핫플러그 포함), 일별 자세 통계 리포트(로컬 자정 기준 버킷, 30일 보관), 14일 경과 시 재측정 권장 배지, 카메라 디바이스 변경 자동 감지와 안내, 시스템 다크모드 자동 추종, 알림 크기 옵션(보통·작게), 부팅 시 자동 실행, 단일 인스턴스 보장이 있다. 카메라 권한 거부 등 오류 상황에 OS별 카메라 설정 페이지로 바로 이동시켜 사용자가 막다른 길에 갇히지 않도록 했다.
 
 배포는 아직 실제 출시 전 준비 단계로, `electron-builder` 설정과 빌드 스크립트(`npm run build:win` / `build:mac`)는 갖춰져 있지만 인스톨러 산출물을 실제로 만들어 배포한 적은 없는 상태다. 단계적 출시 계획은 다음과 같다. 1단계는 빌드 담당자가 로컬에서 만든 Windows NSIS 인스톨러(.exe)와 macOS dmg 를 사내 사용자에게 슬랙으로 직접 공유하는 가장 가벼운 방식으로 시작한다. 2단계로 `electron-updater` + private GitHub Releases 를 연동해 Windows 사용자는 다이얼로그 한 번 클릭으로 자동 업데이트되도록 만들고, 사용자 수가 늘어나면 3단계에서 GitHub Actions 워크플로로 태그 푸시 기반 빌드·배포까지 자동화한다. macOS 자동 업데이트는 Apple Developer Program(연 $99) 가입과 코드 사인·공증이 필요하기 때문에 초기에는 수동 dmg 공유로 운영하고 사용자 비중이 일정 규모를 넘긴 시점에 도입 여부를 결정한다. 코드 서명 없는 동안 Windows SmartScreen·macOS Gatekeeper 경고가 첫 실행 시 뜨지만 사용자 안내로 우회 가능하며, EV Code Signing Certificate(연 $300+) 같은 비용 항목은 사내 단계에서는 보류하고 정식 공개 배포 시점에 다시 검토한다.
+
+---
+
+## 9. 진행 상황 & 남은 작업 (2026-06-01 기준)
+
+다음 작업 세션에서 이어서 진행하기 위한 체크포인트. 새 세션에서는 이 섹션을 기준으로 "어디까지 됐고 다음에 뭘 해야 하는지" 파악하면 된다.
+
+### 9.1 완료
+
+#### 본 기능 (코드 측)
+- [x] 자세 감지 핵심 로직 (FaceDetector + baseline 비교 + 히스테리시스)
+- [x] 거북목 우선 → 굽은 등 양보 규칙 변경 (둘 다 발생 시 기린도 등장 가능)
+- [x] 다중 얼굴 처리 (`selectBestDetection`)
+- [x] baseline 측정 분산 체크 (자세 흔들리면 invalid 처리)
+- [x] 멀티 모니터 자동 대응 (디스플레이별 오버레이 + hot-plug)
+- [x] 일별 자세 통계 (electron-store JSON, 로컬 자정 기준, 30일 보관)
+- [x] 자세 통계 UI 카드 (설정창)
+- [x] 카메라 디바이스 변경 감지 + 안내
+- [x] baseline 신선도 (14일 경과 시 재측정 권장 배지)
+- [x] 트레이 우클릭 컨텍스트 메뉴 + 동적 툴팁
+- [x] 시스템 다크모드 추종 (`themeMode: system/light/dark`)
+- [x] 알림 크기 옵션 (보통/작게)
+- [x] 카메라 권한 거부 복구 가이드 + OS 카메라 설정 deep link
+- [x] detector 창 X 닫기 1회 안내 알림
+- [x] 인트로 (촬영 시작 직전 인사 + 개인정보 안내)
+- [x] 측정 완료 success 애니메이션 (체크 그려지는 SVG)
+- [x] 단일 인스턴스 락 (트레이 중복 방지)
+
+#### 배포 (Windows)
+- [x] `electron-builder` 설정 (`package.json` build 필드)
+- [x] `npm run build:win` 첫 빌드 성공 → `dist/JJUUK Setup 0.1.0.exe` (~160MB) + blockmap + latest.yml 생성
+- [x] 로컬 머신 설치 검증 (`%LOCALAPPDATA%\Programs\JJUUK\`)
+- [x] 설치된 앱 실행 → 트레이/오버레이/IPC 정상 동작 확인
+- [x] Windows 개발자 모드 켜기 (winCodeSign 심볼릭 링크 권한 이슈 해결)
+
+#### 배포 (macOS)
+- [x] `package.json` 에 `mac.target=dmg`, `NSCameraUsageDescription`, `LSUIElement` 후보 항목 준비
+
+---
+
+### 9.2 다음에 해야 할 일
+
+#### A. Windows 배포 — 다음 단계
+- [ ] **클린 PC end-to-end 테스트** — 다른 컴퓨터(가급적 처음 사용하는 사용자 환경)에서 인스톨러 다운로드 → SmartScreen 경고 우회 → 설치 → 카메라 권한 허용 → 인트로 → 첫 캘리브레이션 → 트레이 상주 → 자세 알림까지 전 흐름 검증
+- [ ] **자동 실행 검증** — 설정에서 토글 ON → PC 재부팅 → 트레이 자동 등장 확인 (현재 `app.setLoginItemSettings` 로직이 packaged 환경에서 제대로 동작하는지 실증)
+- [ ] **사용자 가이드 1장 작성** — SmartScreen 경고 첫 실행 우회 방법, 카메라 권한 허용 방법, 트레이 사용법 (슬랙 공유용 PDF or 이미지)
+- [ ] **`electron-updater` 통합** — `npm i electron-updater` + `main.js` 에 `autoUpdater.checkForUpdatesAndNotify()` 추가 + `package.json build.publish` 에 github provider 추가
+- [ ] **private GitHub repo + Release 첫 업로드** — `GH_TOKEN` 발급 → `set GH_TOKEN=ghp_xxx && npm run build:win -- --publish=always` → Release 에 `.exe` + `latest.yml` + `blockmap` 자동 첨부 확인
+- [ ] **차등 업데이트 검증** — v0.1.0 설치된 상태에서 v0.1.1 Release 올린 후, 기존 클라가 업데이트 다이얼로그를 뜨우고 변경분만 다운로드 받는지 확인
+- [ ] (옵션) **GitHub Actions 빌드 자동화** — `.github/workflows/build-win.yml` 작성, 태그 푸시 → 자동 빌드/Release 게시. 사용자 5명+ 시점에 도입
+- [ ] (v1.0) **EV Code Signing Certificate** 도입 — SmartScreen 경고 완전 제거가 필요해진 시점 (연 $300+)
+
+#### B. macOS 배포 — Windows 와 완전 별도 트랙
+
+macOS 빌드는 **반드시 macOS 머신에서 실행해야 한다.** Windows 에서 `npm run build:mac` 은 작동하지 않는다 (electron-builder 가 `hdiutil`, `codesign` 등 macOS 전용 툴체인을 요구). 별도 환경에서 진행해야 함.
+
+- [ ] **macOS 머신 준비** — 직접 빌드할 Mac 한 대 확보 (현재 사내 환경 미확인)
+- [ ] **소스 동기화** — git clone 후 `npm install`
+- [ ] **macOS 빌드 첫 실행** — `npm run build:mac` → `dist/JJUUK-0.1.0.dmg`, `JJUUK-0.1.0-mac.zip` 생성 확인
+- [ ] **로컬 macOS 설치 검증** — dmg 열기 → Applications 폴더로 드래그 → 첫 실행 시 **Gatekeeper 경고 ("확인되지 않은 개발자")** 우회 (우클릭 → "열기") → 카메라 권한 허용 (`NSCameraUsageDescription` 다이얼로그) → 트레이(메뉴바) 아이콘 등장 확인
+- [ ] **`LSUIElement: true` 추가 검토** — 현재 `app.dock?.hide()` 만 적용. Dock 에 잠깐도 안 뜨게 하려면 `package.json` 의 `build.mac.extendInfo` 에 `LSUIElement: true` 명시 필요. 추가 후 재빌드해서 Dock 깜빡임 사라지는지 확인
+- [ ] **메뉴바 아이콘 검증** — `assets/tray/iconTemplate.png` 의 template image flag 가 packaged 환경에서도 제대로 적용돼 다크/라이트 메뉴바 모두에서 잘 보이는지
+- [ ] **macOS 자동 실행 검증** — 설정 토글 ON → 재부팅 → 메뉴바 자동 등장
+- [ ] **(정식 배포 단계) Apple Developer Program 가입** — 연 $99. 이후:
+  - [ ] `package.json build.mac.identity` 에 인증서 이름 설정
+  - [ ] 코드 사인 (`codesign`) 자동 실행 확인
+  - [ ] **공증 (notarization)** — Apple 서버에 업로드 → 검증 후 staple. `notarize` 옵션 추가
+  - [ ] 공증된 dmg 는 Gatekeeper 경고 없이 바로 실행됨을 확인
+- [ ] **macOS 자동 업데이트** — 코드 사인 + 공증이 끝난 뒤에만 가능. electron-updater 가 unsigned 업데이트를 거부하기 때문. 그 전까진 dmg 수동 공유
+
+#### C. 공통 / 미정 사항
+- [ ] **앱 아이콘 multi-resolution 정식 .ico** 만들기 — 16/32/48/64/128/256 모두 포함된 NSIS 안정 버전 (현재 단일 해상도 베이스)
+- [ ] **앱 표시명 통일** — 트레이 툴팁("JJUUK"), 시작메뉴/Applications("JJUUK"), 제어판 표시명("JJUUK"), README 등에서 한글 "쭉" 병기 여부 결정
+- [ ] **store 스키마 마이그레이션 정책** — 미래 버전에서 schema 변경 시 기존 사용자의 `config.json` 을 어떻게 업그레이드할지 (현재는 `themeMode`, `baselineCreatedAt` 마이그레이션 코드만 있음)
+- [ ] **사용자 데이터 백업/복원 기능** — 다른 PC 로 이사할 때 baseline/통계 들고 가는 기능 (선택, 우선순위 낮음)
+- [ ] **의도적으로 보류 중인 항목** — 알림 빈도/일일 한도 옵션, 다국어 i18n, Lottie 기반 캐릭터 사지 애니메이션 (디자이너 에셋 필요)
+
+---
+
+### 9.3 다음 세션 진입 가이드
+
+다음에 작업 이어서 시킬 때 우선순위는 다음 순서로 정리되어 있다:
+
+1. **Windows 클린 PC end-to-end 테스트** — 가장 작은 배포 단위 검증
+2. **사용자 가이드 1장 작성** — 슬랙 공유 시 함께 첨부
+3. **`electron-updater` 통합** — Windows 자동 업데이트 인프라
+4. **macOS 빌드** — Mac 머신 확보 후 진행 (Windows 와 완전 별도)
+5. 그 외 (자동화/공증/정식 사인) — 사용자 규모 확인 후 결정

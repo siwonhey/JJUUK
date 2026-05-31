@@ -5,7 +5,7 @@
 // 낮을수록 민감 (조금만 움직여도 캐릭터 등장), 높을수록 둔감
 const SENSITIVITY_PRESETS = {
   low:    { faceWidthRatio: 1.25, faceYDelta: 0.08 },   // 둔감
-  normal: { faceWidthRatio: 1.15, faceYDelta: 0.05 },   // 기본
+  normal: { faceWidthRatio: 1.13, faceYDelta: 0.05 },   // 기본 — 거북목 살짝 더 예민하게 (1.15 → 1.13)
   high:   { faceWidthRatio: 1.08, faceYDelta: 0.03 },   // 민감
 };
 
@@ -15,10 +15,10 @@ const DEBOUNCE_MS = 700;
 // 자세 복귀로 판정할 때는 threshold의 90% 이하로 떨어져야 (히스테리시스)
 const RECOVERY_RATIO = 0.9;
 
-// 거북목 vs "단순히 모니터에 가까이" 구분용 — yDelta 가 이 값 이하일 때만 거북목으로 인정.
-// 거북목은 얼굴 폭은 늘되 Y중심 변화는 거의 없음. 단순 다가가기는 둘 다 늘어남.
-// baseline 의 faceYDelta 임계치보다 살짝 큰 값(0.6배)을 허용해 정상 미세 흔들림 흡수.
-const TURTLE_NECK_Y_TOLERANCE_FACTOR = 0.6;
+// 거북목 vs 굽은 등 분기 — Y 가 임계치의 이 배수 이상으로 압도적으로 클 때만 slouch 가 turtle-neck 을 이김.
+// 거북목 자세에서도 머리가 살짝 내려가 yDelta 가 임계치를 살짝 넘는 경우가 흔한데,
+// 너무 엄격하게 자르면 진짜 거북목이 기린으로 잘못 분류됨. 1.5배 여유로 그 케이스 흡수.
+const SLOUCH_OVERRIDE_FACTOR = 1.5;
 
 // baseline 신선도 — 이 값 초과 시 재측정 권장 배지/문구 노출
 const RECALIBRATION_RECOMMEND_DAYS = 14;
@@ -38,7 +38,7 @@ module.exports = {
   SENSITIVITY_PRESETS,
   DEBOUNCE_MS,
   RECOVERY_RATIO,
-  TURTLE_NECK_Y_TOLERANCE_FACTOR,
+  SLOUCH_OVERRIDE_FACTOR,
   RECALIBRATION_RECOMMEND_DAYS,
   NOTIFICATION_SIZES,
   DEFAULT_NOTIFICATION_SIZE,
