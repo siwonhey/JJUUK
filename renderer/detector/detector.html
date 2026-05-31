@@ -82,15 +82,15 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      margin-bottom: 18px;       /* header → preview 간격 (기존 톤 유지) */
+      gap: 8px;                  /* title → subtitle 행간 (4 → 8) — 작아진 타이틀에 맞춰 약간 여유 */
+      margin-bottom: 18px;       /* header → preview 간격 */
     }
     .title {
-      font-size: 28px;
+      font-size: 23px;            /* 28 → 23, 측정 화면에서 살짝 작게 */
       font-weight: 600;
       color: var(--ink);
       letter-spacing: -0.022em;
-      line-height: 1.12;
+      line-height: 1.18;
       margin: 0;
     }
     .subtitle {
@@ -158,14 +158,19 @@
       transition: width 0.1s linear;
     }
 
-    /* ── footer (messages + actions) — 카메라 바로 아래에 붙도록 ── */
+    /* ── footer (messages + actions) ── */
+    /* 기본 10px (카메라랑 가깝게) — ready/done/invalid 처럼 버튼이 있는 화면용. */
+    /* 측정 중에만 26px 로 늘려서 두 줄 안내문구가 카메라에 답답하게 붙지 않게. */
     .footer {
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;        /* messages ↔ actions */
-      margin-top: 6px; /* preview → footer */
+      gap: 10px;
+      margin-top: 10px;
+    }
+    body[data-phase="measuring"] .footer {
+      margin-top: 26px;
     }
     .messages {
       display: flex;
@@ -250,6 +255,240 @@
     .btn.secondary.danger:hover:not(:disabled) { background: rgba(217, 59, 59, 0.10); }
     body.dark .btn.secondary.danger:hover:not(:disabled) { background: rgba(255, 105, 97, 0.16); }
 
+    /* ── 카메라 에러 패널 (preview 위에 절대 위치) ── */
+    .camera-error-panel {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      gap: 14px;
+      text-align: center;
+      color: #ffffff;
+      border-radius: 18px;
+    }
+    .camera-error-panel .err-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.012em;
+      margin: 0;
+    }
+    .camera-error-panel .err-body {
+      font-size: 13px;
+      color: #d2d2d7;
+      max-width: 420px;
+      line-height: 1.5;
+      letter-spacing: -0.008em;
+      margin: 0;
+    }
+    .camera-error-panel .err-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .camera-error-panel .btn {
+      font-size: 14px;
+      padding: 9px 18px;
+      min-width: 0;
+    }
+    .camera-error-panel .btn.primary {
+      background: #ffffff;
+      color: #1d1d1f;
+    }
+    .camera-error-panel .btn.primary:hover:not(:disabled) {
+      background: #f0f0f0;
+    }
+    .camera-error-panel .btn.secondary {
+      background: transparent;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    .camera-error-panel .btn.secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* ── 인트로 오버레이 (카메라 켜기 전 인사 + 개인정보 동의) ── */
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--canvas);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      animation: introFadeIn 0.25s ease;
+    }
+    .intro-overlay[hidden] { display: none; }
+    @keyframes introFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .intro-card {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .intro-mark {
+      display: block;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      object-fit: contain;
+      image-rendering: -webkit-optimize-contrast;
+    }
+    /* 트레이 로고가 검은 실루엣이라 다크모드에서 invert + 살짝 밝게 */
+    body.dark .intro-mark {
+      filter: invert(1) brightness(0.96);
+    }
+    .intro-desc {
+      font-size: 15px;
+      color: var(--ink-muted);
+      letter-spacing: -0.012em;
+      line-height: 1.5;
+      /* 로고와 가깝게 끌어올림 (intro-card gap 18px → 실효 약 10px) */
+      margin: -8px 0 0 0;
+      text-align: center;
+    }
+    .intro-privacy {
+      margin-top: 4px;
+      padding: 16px 18px;
+      background: var(--canvas-parchment);
+      border-radius: 14px;
+    }
+    .intro-privacy-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.008em;
+      margin-bottom: 8px;
+    }
+    .intro-privacy-title .lock {
+      display: inline-block;
+      margin-right: 6px;
+      transform: translateY(1px);
+    }
+    .intro-privacy-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .intro-privacy-list li {
+      font-size: 13px;
+      color: var(--ink-muted);
+      line-height: 1.5;
+      letter-spacing: -0.008em;
+      padding-left: 14px;
+      position: relative;
+    }
+    .intro-privacy-list li::before {
+      content: '·';
+      position: absolute;
+      left: 4px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .intro-privacy-list li strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .intro-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    .intro-desc strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* ── 측정 완료 오버레이 (체크 그려지는 애니메이션 + 멘트) ── */
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--canvas);
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 40px;
+      animation: successFadeIn 0.25s ease;
+    }
+    .success-overlay[hidden] { display: none; }
+    @keyframes successFadeIn {
+      from { opacity: 0; transform: scale(0.985); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .success-check {
+      width: 104px;
+      height: 104px;
+    }
+    /* 원 → 0.6s 그려짐, 체크 → 0.5s 딜레이 후 0.4s 에 걸쳐 그려짐 */
+    .success-check .ring {
+      stroke: var(--primary);
+      stroke-width: 4;
+      fill: none;
+      stroke-dasharray: 226;          /* 2π × r(36) ≈ 226 */
+      stroke-dashoffset: 226;
+      transform-origin: 40px 40px;
+      transform: rotate(-90deg);      /* 12시 방향에서 시계방향 */
+      animation: ring-draw 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .success-check .tick {
+      stroke: var(--primary);
+      stroke-width: 6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: tick-draw 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+    }
+    @keyframes ring-draw {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes tick-draw {
+      to { stroke-dashoffset: 0; }
+    }
+    .success-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.022em;
+      margin: 0;
+      text-align: center;
+      opacity: 0;
+      animation: successCopy 0.4s ease 0.55s forwards;
+    }
+    .success-desc {
+      font-size: 15px;
+      color: var(--ink-muted);
+      letter-spacing: -0.012em;
+      line-height: 1.5;
+      margin: 0;
+      text-align: center;
+      opacity: 0;
+      animation: successCopy 0.4s ease 0.7s forwards;
+    }
+    @keyframes successCopy {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -266,6 +505,17 @@
         <canvas id="frozenFrame" hidden></canvas>
         <div id="faceGuide" class="face-guide"></div>
         <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+
+        <div id="cameraErrorPanel" class="camera-error-panel" hidden>
+          <div id="cameraErrorMessage">
+            <h2 class="err-title">카메라를 사용할 수 없어요</h2>
+            <p class="err-body"></p>
+          </div>
+          <div class="err-actions">
+            <button id="cameraRetryBtn" class="btn primary">다시 시도</button>
+            <button id="cameraSettingsBtn" class="btn secondary">OS 카메라 설정 열기</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -281,6 +531,40 @@
       </div>
     </div>
   </div>
+
+  <!-- 인트로 — 측정 직전 호출됨 (showIntro). 기본은 hidden — 사용자가 [측정 시작] 눌렀을 때만 노출. -->
+  <div id="introOverlay" class="intro-overlay" hidden>
+    <div class="intro-card">
+      <img class="intro-mark" src="../../assets/tray/icon@2x.png" alt="JJUUK" />
+      <p class="intro-desc">
+        <strong>쭉(JJUUK)</strong>은 거북목과 굽은 등 자세를 곁에서 챙겨드리는<br/>
+        <strong>자세 케어 서비스</strong>예요
+      </p>
+      <div class="intro-privacy">
+        <div class="intro-privacy-title"><span class="lock"></span>촬영되는 개인정보 안내</div>
+        <ul class="intro-privacy-list">
+          <li>자세를 보기 위해 웹캠 영상을 사용해요</li>
+          <li>영상은 <strong>컴퓨터 안에서만</strong> 분석되고, 어디에도 저장되거나 전송되지 않아요</li>
+          <li>분석이 끝난 영상 프레임은 즉시 메모리에서 사라져요</li>
+          <li>일시정지하면 카메라 LED 도 함께 꺼져요</li>
+        </ul>
+      </div>
+      <div class="intro-actions">
+        <button id="introStartBtn" class="btn primary">시작하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 측정 완료 — confirmBtn(이대로 좋아요) 누르면 잠시 노출 후 자동 닫힘. -->
+  <div id="successOverlay" class="success-overlay" hidden>
+    <svg class="success-check" viewBox="0 0 80 80" aria-hidden="true">
+      <circle class="ring" cx="40" cy="40" r="36" />
+      <path class="tick" d="M22 42 L36 56 L60 28" />
+    </svg>
+    <h2 class="success-title">측정 완료!</h2>
+    <p class="success-desc">이 자세를 기준으로 자세를 봐드릴게요</p>
+  </div>
+
   <script type="module" src="detector.js"></script>
 </body>
 </html>

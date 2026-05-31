@@ -40,6 +40,16 @@ img { -webkit-user-drag: none; pointer-events: none; }
   object-fit: contain;
 }
 
+/* small 모드 — 작업 방해 최소화. 화면 우하단 코너에 미니멀 사이즈. */
+body.size-small .turtle-stage {
+  align-items: flex-end;
+  padding: 0 24px 24px 0;
+}
+body.size-small .turtle-img {
+  width: 32vw;
+  max-height: 38vh;
+}
+
 @keyframes turtle-bob {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   50%      { transform: translate(-22px, -28px) rotate(-1.8deg); }
@@ -74,6 +84,15 @@ img { -webkit-user-drag: none; pointer-events: none; }
   aspect-ratio: 2 / 3;
   display: block;
   object-fit: contain;
+}
+
+body.size-small .giraffe-stage {
+  justify-content: flex-end;
+  padding: 0 24px 0 0;
+}
+body.size-small .giraffe-img {
+  width: 22vw;
+  max-height: 55vh;
 }
 
 @keyframes giraffe-sway {

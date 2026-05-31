@@ -6,8 +6,6 @@
   <link rel="stylesheet" href="../../node_modules/pretendard/dist/web/static/pretendard.css" />
   <title>JJUUK 설정</title>
   <style>
-    /* 말풍선 화살표 위치를 부드럽게 움직이려면 CSS 변수를 등록해야 함.
-       inherits: true 여야 .bubble 에 설정한 값이 ::before 까지 내려간다. */
     @property --arrow-x {
       syntax: '<length-percentage>';
       inherits: true;
@@ -30,12 +28,24 @@
       --switch-on: #2fa46a;
       --accent: #2fa46a;
       --accent-focus: #248256;
+      --accent-soft: rgba(47, 164, 106, 0.10);
       --slider-track: #e8e8ed;
       --select-bg: #ffffff;
       --select-border: #d2d2d7;
       --select-border-hover: #86868b;
       --select-arrow: '%2386868b';
       --preview-bg: #f5f5f7;
+      --segmented-bg: #ececef;
+      --segmented-thumb: #ffffff;
+      --segmented-text: #6e6e73;
+      --segmented-text-active: #1d1d1f;
+      --segmented-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+      --stat-good: #2fa46a;
+      --stat-turtle: #f5a623;
+      --stat-slouch: #d93b3b;
+      --stat-track: #ececef;
+      --badge-bg: rgba(217, 59, 59, 0.12);
+      --badge-text: #b9333a;
       --scrollbar-thumb: rgba(0, 0, 0, 0.28);
       --scrollbar-thumb-hover: rgba(0, 0, 0, 0.48);
     }
@@ -54,12 +64,24 @@
       --switch-on: #4ade80;
       --accent: #4ade80;
       --accent-focus: #4ade80;
+      --accent-soft: rgba(74, 222, 128, 0.16);
       --slider-track: #48484a;
       --select-bg: #2c2c2e;
       --select-border: #3a3a3c;
       --select-border-hover: #58585a;
       --select-arrow: '%23a1a1a6';
       --preview-bg: #2c2c2e;
+      --segmented-bg: #2c2c2e;
+      --segmented-thumb: #48484a;
+      --segmented-text: #a1a1a6;
+      --segmented-text-active: #f5f5f7;
+      --segmented-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+      --stat-good: #4ade80;
+      --stat-turtle: #f5a623;
+      --stat-slouch: #ff6961;
+      --stat-track: #2c2c2e;
+      --badge-bg: rgba(255, 105, 97, 0.18);
+      --badge-text: #ff8a85;
       --scrollbar-thumb: rgba(255, 255, 255, 0.28);
       --scrollbar-thumb-hover: rgba(255, 255, 255, 0.48);
     }
@@ -75,25 +97,15 @@
       user-select: none;
       transition: background 0.2s, color 0.2s;
     }
-    /* 윈도우(html) 자체가 스크롤 — 박스 내부 스크롤 X */
     html {
       height: 100%;
       overflow-y: auto;
-      /* 스크롤이 생겨도 콘텐츠가 좌우로 흔들리지 않도록 */
       scrollbar-gutter: stable;
     }
-    body {
-      min-height: 100%;
-    }
-    .modal {
-      display: flex;
-      flex-direction: column;
-    }
-    .body-wrap {
-      padding: 32px 28px 28px;
-    }
+    body { min-height: 100%; }
+    .modal { display: flex; flex-direction: column; }
+    .body-wrap { padding: 32px 28px 16px; }
 
-    /* 스크롤바 — 윈도우 우측 가장자리에 얇은 thumb 만 (light/dark 자동) */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb {
@@ -124,6 +136,9 @@
       margin: 0 0 5px 0;
       letter-spacing: -0.022em;
       line-height: 1.24;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
     .section-sub {
       font-size: 13px;
@@ -152,10 +167,58 @@
       flex-shrink: 0;
     }
 
+    /* ───── 배지 (재측정 권장 등) ───── */
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      letter-spacing: -0.004em;
+      line-height: 1.5;
+    }
+
+    /* ───── segmented control (Apple 스타일) ───── */
+    .segmented {
+      display: inline-flex;
+      background: var(--segmented-bg);
+      border-radius: 9px;
+      padding: 2px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .segmented button {
+      appearance: none;
+      -webkit-appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--segmented-text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.008em;
+      padding: 6px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      line-height: 1.3;
+    }
+    .segmented button:hover:not(.active) {
+      color: var(--segmented-text-active);
+    }
+    .segmented button.active {
+      background: var(--segmented-thumb);
+      color: var(--segmented-text-active);
+      box-shadow: var(--segmented-shadow);
+    }
+    .segmented button:focus-visible {
+      outline: 2px solid var(--accent-focus);
+      outline-offset: 2px;
+    }
+
     /* ───── 민감도 슬라이더 ───── */
     .slider-block { margin-top: 18px; }
-    /* 기본 accent-color 는 Chromium 이 unfilled 영역을 시스템 기본 톤으로 그려서
-       라이트 모드에서도 어둡게 보이는 문제가 있어 트랙을 명시적으로 다시 그림. */
     input[type=range] {
       -webkit-appearance: none;
       appearance: none;
@@ -163,7 +226,7 @@
       background: transparent;
       cursor: pointer;
       outline: none;
-      height: 18px; /* 썸 클릭 영역 확보 */
+      height: 18px;
     }
     input[type=range]::-webkit-slider-runnable-track {
       height: 4px;
@@ -179,7 +242,7 @@
       border-radius: 50%;
       background: var(--accent);
       border: 2px solid var(--bg);
-      margin-top: -7px;       /* 4px 트랙 가운데 정렬 */
+      margin-top: -7px;
       cursor: pointer;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
       transition: background 0.15s;
@@ -250,13 +313,12 @@
       cursor: pointer;
       font-family: inherit;
       letter-spacing: -0.012em;
-      min-width: 144px;
+      min-width: 156px;
       transition: background-color 0.2s, border-color 0.15s, color 0.2s;
     }
     .design-select:hover { border-color: var(--select-border-hover); }
     .design-select:focus { outline: none; border-color: var(--accent); }
 
-    /* 프리뷰 — 거북이/기린 나란히 */
     .preview-card {
       margin-top: 18px;
       border-radius: 18px;
@@ -275,6 +337,105 @@
     }
     .preview-character.turtle  { width: 52%; aspect-ratio: 3 / 2; }
     .preview-character.giraffe { width: 30%; aspect-ratio: 2 / 3; }
+
+    /* ───── 통계 카드 ───── */
+    .stats-card {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--preview-bg);
+      border: 1px solid var(--border-soft);
+    }
+    .stats-summary {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .stats-summary .headline {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-strong);
+      letter-spacing: -0.018em;
+      line-height: 1.1;
+    }
+    .stats-summary .headline .unit {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-sub);
+      margin-left: 4px;
+    }
+    .stats-summary .ratio {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .stats-bar {
+      display: flex;
+      height: 8px;
+      width: 100%;
+      border-radius: 9999px;
+      overflow: hidden;
+      background: var(--stat-track);
+    }
+    .stats-bar > span {
+      display: block;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .stats-bar .bar-good   { background: var(--stat-good); }
+    .stats-bar .bar-turtle { background: var(--stat-turtle); }
+    .stats-bar .bar-slouch { background: var(--stat-slouch); }
+    .stats-legend {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .stats-legend .item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: flex-start;
+    }
+    .stats-legend .item .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.004em;
+    }
+    .stats-legend .item .value {
+      font-size: 13px;
+      color: var(--text-strong);
+      font-weight: 600;
+      letter-spacing: -0.008em;
+    }
+    .stats-legend .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot.good   { background: var(--stat-good); }
+    .dot.turtle { background: var(--stat-turtle); }
+    .dot.slouch { background: var(--stat-slouch); }
+    .stats-7d {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      letter-spacing: -0.004em;
+    }
+    .stats-7d strong { color: var(--text-strong); font-weight: 600; }
+    .stats-empty {
+      padding: 14px 0 6px;
+      text-align: center;
+      color: var(--text-sub);
+      font-size: 13px;
+      letter-spacing: -0.008em;
+    }
 
     /* ───── gooey 토글 (메뉴와 동일) ───── */
     .switch {
@@ -330,10 +491,10 @@
       80%  { transform: translateY(20px); opacity: 1; }
       100% { transform: translateY(22px); opacity: 0; }
     }
+
   </style>
 </head>
 <body>
-  <!-- goo 필터 (메뉴와 공유되는 SVG 정의) -->
   <svg style="position: fixed; width: 0; height: 0;">
     <defs>
       <filter id="goo">
@@ -372,7 +533,23 @@
 
       <div class="section-divider"></div>
 
-      <!-- 1. 감지 민감도 -->
+      <!-- 1. 알림 크기 -->
+      <section class="section">
+        <div class="section-row">
+          <div class="section-text">
+            <h3 class="section-label">알림 크기</h3>
+            <p class="section-sub">캐릭터를 화면 가득 띄울지, 코너에 작게 띄울지 정해요.</p>
+          </div>
+          <div class="segmented" id="notif-size" role="tablist" aria-label="알림 크기">
+            <button type="button" data-value="normal" role="tab">보통</button>
+            <button type="button" data-value="small" role="tab">작게</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- 2. 감지 민감도 -->
       <section class="section">
         <div class="section-row">
           <div class="section-text">
@@ -393,7 +570,7 @@
 
       <div class="section-divider"></div>
 
-      <!-- 2. 자동 실행 -->
+      <!-- 3. 자동 실행 -->
       <section class="section">
         <div class="section-row">
           <div class="section-text">
@@ -413,32 +590,79 @@
 
       <div class="section-divider"></div>
 
-      <!-- 3. 다크 모드 -->
+      <!-- 4. 테마 -->
       <section class="section">
         <div class="section-row">
           <div class="section-text">
-            <h3 class="section-label">다크 모드</h3>
-            <p class="section-sub">화면이 눈에 편한 어두운 톤으로 바뀌어요.</p>
+            <h3 class="section-label">테마</h3>
+            <p class="section-sub">시스템 다크모드를 따라가거나 직접 지정할 수 있어요.</p>
           </div>
-          <label class="switch">
-            <input id="dark-mode" type="checkbox" />
-            <svg class="switch-svg" viewBox="0 0 52 32" filter="url(#goo)">
-              <circle class="circle-off" cx="16" cy="16" r="10" />
-              <circle class="circle-on"  cx="36" cy="16" r="10" />
-              <circle class="drop"       cx="35" cy="-1" r="2.5" />
-            </svg>
-          </label>
+          <div class="segmented" id="theme-mode" role="tablist" aria-label="테마 모드">
+            <button type="button" data-value="system" role="tab">자동</button>
+            <button type="button" data-value="light"  role="tab">라이트</button>
+            <button type="button" data-value="dark"   role="tab">다크</button>
+          </div>
         </div>
       </section>
 
       <div class="section-divider"></div>
 
-      <!-- 4. 재측정 -->
+      <!-- 5. 오늘의 자세 리포트 -->
+      <section class="section">
+        <div class="section-row">
+          <div class="section-text">
+            <h3 class="section-label">오늘의 자세 리포트</h3>
+            <p class="section-sub">감지가 켜져 있던 시간 중 자세가 어땠는지 비율로 보여드려요.</p>
+          </div>
+        </div>
+        <div id="stats-card" class="stats-card">
+          <div id="stats-empty" class="stats-empty" hidden>아직 기록이 없어요. 자세가 흐트러지면 여기에 쌓여요.</div>
+          <div id="stats-content">
+            <div class="stats-summary">
+              <div class="headline">
+                <span id="stats-good-hr">0</span><span class="unit">시간</span>
+                <span id="stats-good-min">0</span><span class="unit">분</span>
+              </div>
+              <div class="ratio">양호 <strong id="stats-good-pct">0%</strong></div>
+            </div>
+            <div class="stats-bar" aria-label="오늘 자세 비율">
+              <span class="bar-good"   id="stats-bar-good"   style="width:0%"></span>
+              <span class="bar-turtle" id="stats-bar-turtle" style="width:0%"></span>
+              <span class="bar-slouch" id="stats-bar-slouch" style="width:0%"></span>
+            </div>
+            <div class="stats-legend">
+              <div class="item">
+                <span class="label"><span class="dot good"></span>양호</span>
+                <span class="value" id="stats-val-good">0분</span>
+              </div>
+              <div class="item">
+                <span class="label"><span class="dot turtle"></span>거북목</span>
+                <span class="value" id="stats-val-turtle">0분</span>
+              </div>
+              <div class="item">
+                <span class="label"><span class="dot slouch"></span>굽은 등</span>
+                <span class="value" id="stats-val-slouch">0분</span>
+              </div>
+            </div>
+            <div class="stats-7d">
+              <span>지난 7일 양호 비율</span>
+              <span><strong id="stats-7d-pct">0%</strong></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- 6. 재측정 -->
       <section id="recalibrate-btn" class="section clickable">
         <div class="section-row">
           <div class="section-text">
-            <h3 class="section-label">내 자세 다시 측정하기</h3>
-            <p class="section-sub">현재 자세를 새 기준으로 다시 기록해요.</p>
+            <h3 class="section-label">
+              내 자세 다시 측정하기
+              <span id="stale-badge" class="badge" hidden>재측정 권장</span>
+            </h3>
+            <p class="section-sub" id="baseline-meta">현재 자세를 새 기준으로 다시 기록해요.</p>
           </div>
           <span class="chevron">›</span>
         </div>

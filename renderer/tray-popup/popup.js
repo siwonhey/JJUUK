@@ -1,19 +1,35 @@
 const toggle = document.getElementById('active-toggle');
 const statusEl = document.getElementById('status');
+const staleBadge = document.getElementById('stale-badge');
 
 function render(active) {
   toggle.checked = !!active;
   statusEl.textContent = active ? '자세 감지 중' : '일시정지됨';
 }
 
+async function refreshBaselineBadge() {
+  try {
+    const meta = await window.jjuuk.getBaselineMeta();
+    staleBadge.hidden = !(meta && meta.stale);
+  } catch (e) {
+    staleBadge.hidden = true;
+  }
+}
+
 (async function init() {
   const active = await window.jjuuk.getActive();
   render(active);
+  await refreshBaselineBadge();
 })();
 
 toggle.addEventListener('change', () => {
   window.jjuuk.setActive(toggle.checked);
   render(toggle.checked);
+});
+
+document.getElementById('recalibrate').addEventListener('click', () => {
+  window.jjuuk.recalibrate();
+  window.jjuuk.closePopup();
 });
 
 document.getElementById('open-settings').addEventListener('click', () => {
@@ -48,7 +64,6 @@ document.body.addEventListener('mousemove', (e) => {
   }
 });
 
-// 윈도우 자체를 벗어나는 경우(휙 빠른 이동)도 보호
 document.body.addEventListener('mouseleave', () => {
   if (hasEnteredCard) startHide();
 });
@@ -58,6 +73,7 @@ window.jjuuk.onPopupShown(async () => {
   cancelHide();
   const active = await window.jjuuk.getActive();
   render(active);
+  await refreshBaselineBadge();
 });
 
 window.jjuuk.onTheme((theme) => {

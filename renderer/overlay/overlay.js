@@ -13,6 +13,11 @@ function setDesign(design) {
   giraffeImg.src = `../../assets/characters/${safe}/giraffe.png`;
 }
 
+function setSize(size) {
+  // 'normal' (기본 풀스크린 임팩트) | 'small' (코너 미니멀)
+  document.body.classList.toggle('size-small', size === 'small');
+}
+
 function setState(state) {
   if (state === currentState) return;
   currentState = state;
@@ -23,3 +28,4 @@ function setState(state) {
 window.jjuuk.onPostureState((s) => setState(s));
 window.jjuuk.onCharacterHide(() => setState('good'));
 window.jjuuk.onCharacterDesign((d) => setDesign(d));
+window.jjuuk.onCharacterSize?.((s) => setSize(s));

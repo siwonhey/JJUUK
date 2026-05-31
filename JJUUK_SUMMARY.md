@@ -25,6 +25,7 @@
 ```
 [웹캠]
    │ getUserMedia
+   
    ▼
 [MediaPipe FaceDetector (VIDEO 모드, GPU delegate)]
    │ detectForVideo(video, ts)
@@ -333,3 +334,14 @@ set GH_TOKEN=ghp_xxx && npm run build:win -- --publish=always
 - v0.4: Mac 코드 사인/공증 도입 시점 — 사용자 5명+ 가 기준
 - v1.0: EV Code Signing(Win) — SmartScreen 완전 제거가 필요할 때
 
+---
+
+## 8. 서비스 소개 (발표용)
+
+JJUUK(쭉) 은 웹캠으로 사용자의 자세를 실시간 감지해 거북목이나 굽은 등 자세가 나타나면 데스크탑 화면에 거북이·기린 캐릭터를 슬쩍 띄워 부드럽게 알려주는 자세 케어 서비스다. 사용자는 트레이에 상주하는 앱을 통해 백그라운드에서 자세를 관리하고, 자신의 자세 이력을 일별 리포트로 확인할 수 있다. 첫 실행 시 3초간 정자세를 측정해 baseline(얼굴 박스의 폭과 중심 Y좌표 평균) 을 저장한 뒤, 이후 매 프레임마다 baseline 대비 변화량으로 자세를 판정한다. 얼굴 폭만 늘어나고 Y좌표는 안정적이면 거북목, Y좌표가 임계치 이상 내려가면 굽은 등으로 분류하며, 700ms 디바운스와 3초 쿨다운, 양방향 히스테리시스로 알림이 짧은 자세 흔들림에 깜빡이지 않도록 안정화했다. 자세 상태가 바뀌면 메인 프로세스가 IPC 로 모든 연결된 디스플레이의 풀스크린 투명 오버레이에 동시 전파해 어느 모니터를 보고 있어도 알림이 보이게 된다.
+
+기술 스택은 런타임으로 Electron 33(메인·렌더러·preload 분리, contextIsolation 적용), 자세 감지에 Google MediaPipe Tasks Vision 의 FaceDetector(WASM 기반, GPU delegate + CPU 폴백) 를 사용한다. 영속화는 별도 DB 없이 electron-store 가 관리하는 단일 JSON 파일에 사용자 설정과 일별 자세 통계까지 함께 저장하며, UI 는 별도 프레임워크 없이 순수 HTML/CSS/JS 와 Pretendard 폰트로 구성했다. 패키징은 electron-builder 로 Windows(NSIS)·macOS(dmg) 빌드를 지원한다.
+
+주요 기능으로는 3초 캘리브레이션, 실시간 자세 감지와 캐릭터 오버레이, 트레이 좌클릭의 gooey 토글 팝업과 우클릭의 네이티브 컨텍스트 메뉴, 멀티 모니터 자동 대응(디스플레이 핫플러그 포함), 일별 자세 통계 리포트(로컬 자정 기준 버킷, 30일 보관), 14일 경과 시 재측정 권장 배지, 카메라 디바이스 변경 자동 감지와 안내, 시스템 다크모드 자동 추종, 알림 크기 옵션(보통·작게), 부팅 시 자동 실행, 단일 인스턴스 보장이 있다. 카메라 권한 거부 등 오류 상황에 OS별 카메라 설정 페이지로 바로 이동시켜 사용자가 막다른 길에 갇히지 않도록 했다.
+
+배포는 아직 실제 출시 전 준비 단계로, `electron-builder` 설정과 빌드 스크립트(`npm run build:win` / `build:mac`)는 갖춰져 있지만 인스톨러 산출물을 실제로 만들어 배포한 적은 없는 상태다. 단계적 출시 계획은 다음과 같다. 1단계는 빌드 담당자가 로컬에서 만든 Windows NSIS 인스톨러(.exe)와 macOS dmg 를 사내 사용자에게 슬랙으로 직접 공유하는 가장 가벼운 방식으로 시작한다. 2단계로 `electron-updater` + private GitHub Releases 를 연동해 Windows 사용자는 다이얼로그 한 번 클릭으로 자동 업데이트되도록 만들고, 사용자 수가 늘어나면 3단계에서 GitHub Actions 워크플로로 태그 푸시 기반 빌드·배포까지 자동화한다. macOS 자동 업데이트는 Apple Developer Program(연 $99) 가입과 코드 사인·공증이 필요하기 때문에 초기에는 수동 dmg 공유로 운영하고 사용자 비중이 일정 규모를 넘긴 시점에 도입 여부를 결정한다. 코드 서명 없는 동안 Windows SmartScreen·macOS Gatekeeper 경고가 첫 실행 시 뜨지만 사용자 안내로 우회 가능하며, EV Code Signing Certificate(연 $300+) 같은 비용 항목은 사내 단계에서는 보류하고 정식 공개 배포 시점에 다시 검토한다.

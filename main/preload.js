@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('jjuuk', {
   notifyCalibStart: () => ipcRenderer.send('calibration:start'),
   notifyCalibDone: () => ipcRenderer.send('calibration:done'),
   saveBaseline: (b) => ipcRenderer.send('baseline:save', b),
+  openCameraSettings: () => ipcRenderer.send('app:open-camera-settings'),
+  notifyCameraDeviceId: (deviceId) => ipcRenderer.send('camera:device-id', deviceId),
 
   // main → detector listeners
   onSetActive: (cb) => ipcRenderer.on('posture:set-active', (_e, v) => cb(v)),
@@ -17,19 +19,27 @@ contextBridge.exposeInMainWorld('jjuuk', {
   onPostureState: (cb) => ipcRenderer.on('posture:state', (_e, v) => cb(v)),
   onCharacterHide: (cb) => ipcRenderer.on('character:hide', cb),
   onCharacterDesign: (cb) => ipcRenderer.on('character:set-design', (_e, v) => cb(v)),
+  onCharacterSize: (cb) => ipcRenderer.on('character:set-size', (_e, v) => cb(v)),
 
   // settings ↔ main
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSensitivity: (name) => ipcRenderer.send('settings:set-sensitivity', name),
   setOpenAtLogin: (value) => ipcRenderer.send('settings:set-open-at-login', value),
   setCharacterDesign: (name) => ipcRenderer.send('settings:set-character-design', name),
+  setThemeMode: (mode) => ipcRenderer.send('settings:set-theme-mode', mode),
+  setNotificationSize: (size) => ipcRenderer.send('settings:set-notification-size', size),
+  // 구버전 호환
   setTheme: (name) => ipcRenderer.send('settings:set-theme', name),
+
+  // stats
+  getStats: (days) => ipcRenderer.invoke('stats:get', days),
 
   // 모든 윈도우 공통 — 테마 변경 broadcast 수신
   onTheme: (cb) => ipcRenderer.on('theme:set', (_e, v) => cb(v)),
 
   // 팝업/설정 공용 액션
   getActive: () => ipcRenderer.invoke('app:get-active'),
+  getBaselineMeta: () => ipcRenderer.invoke('app:get-baseline-meta'),
   setActive: (value) => ipcRenderer.send('app:set-active', value),
   recalibrate: () => ipcRenderer.send('app:recalibrate'),
   openSettings: () => ipcRenderer.send('app:open-settings'),
