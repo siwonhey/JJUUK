@@ -74,6 +74,7 @@ let trayPopupWin = null;
 let popupLastHideAt = 0;
 let isActive = store.get('active');
 let isAppQuitting = false;
+let isCalibrating = false;
 
 // 마지막으로 알려진 자세 상태 — 통계 적립 + 다중 오버레이 동기화
 let currentPostureState = 'good';
@@ -412,7 +413,7 @@ function showTrayPopup() {
   trayPopupWin.setPosition(Math.round(x), Math.round(winY));
   trayPopupWin.show();
   trayPopupWin.focus();
-  trayPopupWin.webContents.send('popup:shown');
+  try { trayPopupWin.webContents.send('popup:shown'); } catch { /* frame not ready yet */ }
 }
 
 function toggleTrayPopup() {
@@ -439,6 +440,8 @@ function setActive(value) {
 function triggerRecalibration() {
   if (!isActive) setActive(true);
   if (alive(detectorWin)) {
+    isCalibrating = true;
+    broadcastToOverlays('character:hide');
     detectorWin.show();
     detectorWin.webContents.send('posture:calibrate');
   }
@@ -584,13 +587,19 @@ app.whenReady().then(() => {
   // ── detector → main ───────────────────────────────────────
   ipcMain.on('posture:state', (_e, state) => {
     currentPostureState = state;
-    broadcastToOverlays('posture:state', state);
+    if (!isCalibrating) broadcastToOverlays('posture:state', state);
     if (isActive) setTrackedState(state);
   });
 
-  ipcMain.on('calibration:start', () => detectorWin?.show());
+  ipcMain.on('calibration:start', () => {
+    detectorWin?.show();
+    isCalibrating = true;
+    broadcastToOverlays('character:hide');
+  });
   ipcMain.on('calibration:done', () => {
     detectorWin?.hide();
+    isCalibrating = false;
+    broadcastToOverlays('posture:state', currentPostureState);
     if (!store.get('hasShownPostCalibNotice')) {
       store.set('hasShownPostCalibNotice', true);
       notify('JJUUK 가 트레이에서 자세를 봐 줄게요', '카메라가 백그라운드에서 동작합니다. 트레이 아이콘으로 언제든 일시정지하세요.');

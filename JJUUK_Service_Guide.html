@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>쭉(JJUUK) 사용 가이드</title>
+  <style>
+    :root {
+      --blue:        #0066cc;
+      --blue-bright: #2997ff;
+      --ink:         #1d1d1f;
+      --muted:       #6e6e73;
+      --parchment:   #f5f5f7;
+      --white:       #ffffff;
+      --tile:        #272729;
+      --hairline:    #e0e0e0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      color: var(--ink);
+      background: #e8e8e8;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    @page { size: A4; margin: 0; }
+
+    @media print {
+      body { background: white; }
+      .page { box-shadow: none !important; }
+    }
+
+    /* ── Page shell ── */
+    .page {
+      width: 210mm;
+      height: 297mm;
+      position: relative;
+      overflow: hidden;
+      break-after: page;
+      page-break-after: always;
+      margin: 0 auto 8mm;
+      box-shadow: 0 4px 40px rgba(0,0,0,.18);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Page footer stripe ── */
+    .page-footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 8mm;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14mm;
+      font-size: 7.5pt;
+      color: rgba(255,255,255,.25);
+      background: transparent;
+    }
+    .page-footer.dark-footer { color: rgba(0,0,0,.2); }
+
+    /* ══════════════════════════════════
+       PAGE 1 · COVER
+    ══════════════════════════════════ */
+    .cover {
+      background: var(--tile);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 18mm 16mm 12mm;
+      position: relative;
+    }
+
+    .cover-eyebrow {
+      font-size: 8pt;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+      margin-bottom: auto;
+    }
+
+    .cover-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .cover-logo {
+      font-size: 100pt;
+      font-weight: 600;
+      letter-spacing: -5px;
+      line-height: .95;
+      color: #fff;
+    }
+
+    .cover-subtitle {
+      font-size: 13pt;
+      font-weight: 400;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      margin-top: 5mm;
+    }
+
+    .cover-tagline {
+      font-size: 22pt;
+      font-weight: 300;
+      line-height: 1.35;
+      color: rgba(255,255,255,.82);
+      margin-top: 12mm;
+      max-width: 145mm;
+    }
+
+    .cover-chars {
+      margin-top: 14mm;
+      display: flex;
+      gap: 4mm;
+    }
+
+    .cover-char-badge {
+      width: 13mm;
+      height: 13mm;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22pt;
+      background: rgba(255,255,255,.06);
+    }
+
+    .cover-rule {
+      height: 1px;
+      background: rgba(255,255,255,.1);
+      margin: 8mm 0 5mm;
+    }
+
+    .cover-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: rgba(255,255,255,.25);
+    }
+
+    /* ══════════════════════════════════
+       PAGE 2 · INTRO + TOC
+    ══════════════════════════════════ */
+    .intro-page {
+      background: var(--parchment);
+      flex: 1;
+      padding: 16mm 16mm 14mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .intro-header {
+      margin-bottom: 10mm;
+    }
+
+    .eyebrow {
+      font-size: 8pt;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 3mm;
+    }
+
+    .page-title {
+      font-size: 32pt;
+      font-weight: 600;
+      letter-spacing: -1.5px;
+      line-height: 1.06;
+      color: var(--ink);
+    }
+
+    .page-lead {
+      font-size: 12pt;
+      font-weight: 400;
+      line-height: 1.65;
+      color: var(--muted);
+      margin-top: 5mm;
+      max-width: 155mm;
+    }
+
+    .hairline {
+      height: 1px;
+      background: var(--hairline);
+      margin: 8mm 0;
+    }
+
+    .toc-label {
+      font-size: 8pt;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5mm;
+    }
+
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 3.5mm; }
+
+    .toc-item {
+      display: flex;
+      align-items: baseline;
+    }
+
+    .toc-num {
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: var(--blue);
+      min-width: 9mm;
+    }
+
+    .toc-name {
+      font-size: 13pt;
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+
+    .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted var(--hairline);
+      margin: 0 3mm 2px;
+    }
+
+    .toc-page {
+      font-size: 9pt;
+      color: var(--muted);
+    }
+
+    /* ══════════════════════════════════
+       SHARED CONTENT SECTION
+    ══════════════════════════════════ */
+    .content-page {
+      flex: 1;
+      padding: 14mm 16mm 12mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bg-white    { background: var(--white); }
+    .bg-parchment{ background: var(--parchment); }
+    .bg-dark     { background: var(--tile); color: white; }
+
+    .bg-dark .eyebrow      { color: var(--blue-bright); }
+    .bg-dark .page-title   { color: white; }
+    .bg-dark .page-lead    { color: rgba(255,255,255,.55); }
+    .bg-dark .hairline     { background: rgba(255,255,255,.1); }
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 5.5mm; }
+
+    .step { display: flex; gap: 4.5mm; align-items: flex-start; }
+
+    .step-num {
+      width: 7.5mm;
+      height: 7.5mm;
+      min-width: 7.5mm;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8.5pt;
+      font-weight: 600;
+      margin-top: .5mm;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 11pt;
+      line-height: 1.58;
+      letter-spacing: -0.2px;
+      color: var(--ink);
+    }
+
+    .step-text strong { font-weight: 600; }
+
+    /* Info / Callout box */
+    .callout {
+      background: #eef5ff;
+      border-left: 3px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 4mm 5mm;
+      margin: 5mm 0;
+    }
+
+    .callout-title {
+      font-size: 10pt;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 1.5mm;
+    }
+
+    .callout-body {
+      font-size: 9.5pt;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .callout-body strong { font-weight: 600; color: var(--ink); }
+
+    /* Feature cards (2-col grid) */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3.5mm;
+      margin-top: 5mm;
+    }
+
+    .feature-card {
+      background: white;
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+      padding: 5mm;
+    }
+
+    .bg-parchment .feature-card { background: white; }
+
+    .feature-icon {
+      font-size: 18pt;
+      margin-bottom: 2.5mm;
+    }
+
+    .feature-card-title {
+      font-size: 11pt;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--ink);
+      margin-bottom: 1.5mm;
+    }
+
+    .feature-card-body {
+      font-size: 9.5pt;
+      line-height: 1.58;
+      color: var(--muted);
+    }
+
+    .feature-card-body strong { font-weight: 600; color: var(--ink); }
+
+    /* Bullet tip rows */
+    .tip-list { display: flex; flex-direction: column; gap: 3.5mm; }
+
+    .tip-item {
+      display: flex;
+      gap: 3mm;
+      align-items: flex-start;
+      font-size: 10.5pt;
+      line-height: 1.56;
+      color: var(--ink);
+    }
+
+    .tip-dot {
+      color: var(--blue);
+      font-weight: 700;
+      font-size: 10pt;
+      margin-top: 1.5px;
+      flex-shrink: 0;
+    }
+
+    .tip-item strong { font-weight: 600; }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: 0; }
+
+    .faq-item {
+      padding: 4.5mm 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .faq-item:first-child { border-top: 1px solid var(--hairline); }
+
+    .faq-q {
+      font-size: 10.5pt;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.2px;
+      margin-bottom: 1.5mm;
+      display: flex;
+      gap: 2.5mm;
+      align-items: flex-start;
+    }
+
+    .faq-q-mark {
+      color: var(--blue);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .faq-a {
+      font-size: 9.5pt;
+      line-height: 1.62;
+      color: var(--muted);
+      letter-spacing: -0.1px;
+      padding-left: 5.5mm;
+    }
+
+    .faq-a strong { font-weight: 600; color: var(--ink); }
+
+    /* Privacy items */
+    .privacy-list { display: flex; flex-direction: column; gap: 5.5mm; margin-top: 5mm; }
+
+    .privacy-item {
+      display: flex;
+      gap: 4mm;
+      align-items: flex-start;
+    }
+
+    .privacy-icon {
+      font-size: 14pt;
+      flex-shrink: 0;
+      margin-top: .5mm;
+    }
+
+    .privacy-text {
+      font-size: 11pt;
+      line-height: 1.58;
+      color: rgba(255,255,255,.8);
+      letter-spacing: -0.2px;
+    }
+
+    .privacy-text strong { color: white; font-weight: 600; }
+
+    .privacy-footnote {
+      font-size: 9pt;
+      color: rgba(255,255,255,.35);
+      line-height: 1.5;
+      margin-top: 8mm;
+      padding-top: 5mm;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+
+    /* Contact */
+    .contact-email {
+      display: inline-block;
+      font-size: 15pt;
+      font-weight: 400;
+      color: var(--blue);
+      letter-spacing: -0.4px;
+      margin: 3mm 0 7mm;
+    }
+
+    /* Code badge */
+    .code-tag {
+      display: inline;
+      font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+      font-size: 9pt;
+      background: var(--parchment);
+      border: 1px solid var(--hairline);
+      border-radius: 5px;
+      padding: 0.5mm 2.5mm;
+      color: var(--ink);
+    }
+
+    .bg-dark .code-tag {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.15);
+      color: rgba(255,255,255,.85);
+    }
+
+    /* Closing */
+    .closing-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20mm;
+    }
+
+    .closing-badge {
+      width: 18mm;
+      height: 18mm;
+      background: var(--parchment);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26pt;
+      margin-bottom: 7mm;
+    }
+
+    .closing-title {
+      font-size: 26pt;
+      font-weight: 600;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 4mm;
+    }
+
+    .closing-body {
+      font-size: 12pt;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .closing-sig {
+      font-size: 10pt;
+      color: var(--muted);
+      margin-top: 7mm;
+      font-style: italic;
+    }
+
+    /* Uninstall section */
+    .uninstall-block {
+      background: white;
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+      padding: 5mm;
+      margin-top: 5mm;
+    }
+
+    .uninstall-title {
+      font-size: 10pt;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 3mm;
+    }
+
+    .uninstall-step {
+      font-size: 10pt;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 2mm;
+    }
+
+    .uninstall-step strong { font-weight: 600; color: var(--ink); }
+  </style>
+</head>
+<body>
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 1 · COVER                  ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="cover">
+    <div class="cover-eyebrow">JJUUK · Service Guide</div>
+
+    <div class="cover-body">
+      <div class="cover-logo">쭉</div>
+      <div class="cover-subtitle">JJUUK</div>
+      <div class="cover-tagline">자세가 흐트러진<br>그 순간, 살짝 알려드려요.</div>
+      <div class="cover-chars">
+        <div class="cover-char-badge">🐢</div>
+        <div class="cover-char-badge">🦒</div>
+      </div>
+    </div>
+
+    <div class="cover-rule"></div>
+    <div class="cover-meta">
+      <span>v 0.1.0</span>
+      <span>PLUS-X · 2026</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 2 · INTRO + TOC            ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="intro-page">
+    <div class="intro-header">
+      <div class="eyebrow">소개</div>
+      <div class="page-title">안녕하세요,<br>쭉이에요.</div>
+      <p class="page-lead">
+        오래 앉아 일하다 보면 어느새 어깨가 말리고 목이 앞으로 나오죠. 매번 의식하기는 어려운 일이에요. 그래서 쭉이 곁에서 살짝씩 알려드리려고 해요. 자세가 흐트러진 순간에만 거북이나 기린 친구가 슬쩍 등장해서 신호를 보내요. 그게 전부예요. 무겁지 않게, 부드럽게.
+      </p>
+    </div>
+
+    <div class="hairline"></div>
+
+    <div class="toc-label">목차</div>
+    <ul class="toc-list">
+      <li class="toc-item">
+        <span class="toc-num">01</span>
+        <span class="toc-name">설치하기</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">3</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-num">02</span>
+        <span class="toc-name">처음 만나기</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">4</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-num">03</span>
+        <span class="toc-name">일상 속에서 쓰기</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">5</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-num">04</span>
+        <span class="toc-name">자주 묻는 질문</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">6</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-num">05</span>
+        <span class="toc-name">개인정보에 대한 약속</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">7</span>
+      </li>
+      <li class="toc-item">
+        <span class="toc-num">06</span>
+        <span class="toc-name">문의 · 제거</span>
+        <span class="toc-dots"></span>
+        <span class="toc-page">8</span>
+      </li>
+    </ul>
+
+    <div style="flex:1;"></div>
+
+    <div style="font-size:8.5pt; color:var(--muted); line-height:1.6;">
+      이 안내서 한 장이면 시작하실 수 있어요.
+    </div>
+  </div>
+  <div class="page-footer dark-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>2</span>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 3 · 설치하기               ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="content-page bg-white">
+    <div class="eyebrow">01 · 설치하기</div>
+    <div class="page-title" style="font-size:28pt; margin-bottom:3mm;">설치하기</div>
+    <p class="page-lead">받으신 <strong>JJUUK Setup 0.1.0.exe</strong> 파일을 더블클릭해 주세요.<br>별도 설정 없이 사용자 폴더에 자동 설치돼요. 관리자 권한도 필요 없어요.</p>
+
+    <div class="hairline"></div>
+
+    <div class="callout">
+      <div class="callout-title">🛡️ "Windows가 PC를 보호했습니다" 파란 화면이 떴다면</div>
+      <div class="callout-body">
+        쭉은 아직 정식 코드 서명 절차를 거치지 않은 사내 배포본이라, Windows가 처음 보는 프로그램으로 인식한 거예요. 당황하지 않으셔도 돼요.<br><br>
+        화면의 작은 <strong>"추가 정보"</strong> 글자를 누른 다음, 아래에 나타나는 <strong>"실행"</strong> 버튼을 눌러 주세요.<br>
+        한 번만 거치면 이후엔 바로 열려요.
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div style="display:flex; align-items:center; gap:3mm; padding:4mm; background:var(--parchment); border-radius:10px;">
+      <span style="font-size:16pt;">🐢</span>
+      <div style="font-size:9.5pt; line-height:1.55; color:var(--muted);">
+        설치가 완료되면 쭉이 바로 시작 화면과 함께 등장해요. 다음 페이지에서 이어서 진행하세요.
+      </div>
+    </div>
+  </div>
+  <div class="page-footer dark-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>3</span>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 4 · 처음 만나기            ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="content-page bg-parchment">
+    <div class="eyebrow">02 · 처음 만나기</div>
+    <div class="page-title" style="font-size:28pt; margin-bottom:2mm;">처음 만나기</div>
+    <p class="page-lead" style="margin-bottom:6mm;">설치가 끝나면 쭉이 인사 화면과 함께 등장해요. 아래 순서를 따라 주세요.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">화면을 한 번 훑어보시고 <strong>시작하기</strong>를 눌러 주세요.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Windows가 "카메라를 사용해도 될까요?" 라고 물어보면 <strong>허용</strong>을 눌러 주세요.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">카메라가 켜지면, 화면 중앙의 네모 안에 얼굴이 들어오도록 <strong>평소처럼 모니터 보는 자세</strong>로 편하게 앉아 주세요.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>측정 시작</strong> 버튼을 누르면 3초 동안 자세를 기억해요. 이때는 그대로 가만히 계시면 돼요.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">마지막에 <strong>이대로 좋아요</strong>를 누르면 끝이에요. 쭉은 슬그머니 트레이로 자리를 옮겨요.</div>
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div class="callout" style="background:#f0fff4; border-left-color:#34c759;">
+      <div class="callout-title" style="color:#1d7a3c;">💡 더 정확하게 측정하려면</div>
+      <div class="callout-body">
+        이 3초가 앞으로 여러분의 자세를 비교할 기준이 돼요. <strong>정자세로 앉아 측정하실수록 정확해져요.</strong><br>
+        기준이 잘 안 맞는다 싶으면 언제든 트레이에서 <strong>자세 다시 측정</strong>을 선택할 수 있어요.
+      </div>
+    </div>
+  </div>
+  <div class="page-footer dark-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>4</span>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 5 · 일상 속에서 쓰기       ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="content-page bg-white">
+    <div class="eyebrow">03 · 일상 속에서 쓰기</div>
+    <div class="page-title" style="font-size:28pt; margin-bottom:2mm;">일상 속에서 쓰기</div>
+    <p class="page-lead" style="margin-bottom:4mm;">
+      쭉은 화면 오른쪽 아래(맥은 위쪽 메뉴 바) 시계 옆에<br>작은 거북이 아이콘🐢으로 머물러 있어요.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🐢🦒</div>
+        <div class="feature-card-title">자세 알림</div>
+        <div class="feature-card-body">
+          자세가 흐트러지면 <strong>거북이(거북목)</strong>나 <strong>기린(굽은 등)</strong> 친구가 화면에 슬쩍 나타나요. 자세를 바로잡으면 알아서 사라져요.
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🖱️</div>
+        <div class="feature-card-title">트레이 클릭</div>
+        <div class="feature-card-body">
+          트레이 아이콘을 <strong>클릭</strong>하면 켜기·끄기 토글, 자세 다시 측정, 설정 메뉴가 작은 카드로 떠요. <strong>우클릭</strong>하면 종료를 포함한 전체 메뉴가 보여요.
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <div class="feature-card-title">설정 창</div>
+        <div class="feature-card-body">
+          <strong>캐릭터 디자인</strong> 변경, <strong>알림 크기</strong>(보통·작게), <strong>감지 민감도</strong>, <strong>다크 모드</strong>, <strong>자동 실행</strong>을 조정할 수 있어요.
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-card-title">오늘의 리포트</div>
+        <div class="feature-card-body">
+          설정 창 안에 오늘 하루 자세가 어땠는지 한눈에 보여주는 작은 리포트도 함께 있어요.
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div style="background:var(--parchment); border-radius:10px; padding:4mm 5mm; margin-top:3mm;">
+      <div style="font-size:8.5pt; font-weight:600; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:2.5mm;">자세 다시 측정이 필요할 때</div>
+      <div class="tip-list">
+        <div class="tip-item"><span class="tip-dot">·</span><span>자리를 옮겼거나 모니터 위치가 바뀌었을 때</span></div>
+        <div class="tip-item"><span class="tip-dot">·</span><span>측정한 지 2주가 넘었을 때</span></div>
+        <div class="tip-item"><span class="tip-dot">·</span><span>알림이 너무 자주 뜨거나 거의 안 뜬다고 느낄 때</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer dark-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>5</span>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 6 · 자주 묻는 질문         ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="content-page bg-parchment">
+    <div class="eyebrow">04 · 자주 묻는 질문</div>
+    <div class="page-title" style="font-size:28pt; margin-bottom:6mm;">자주 묻는 질문</div>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="faq-q-mark">Q.</span>
+          카메라 LED가 켜져 있어요. 영상은 어디로 가나요?
+        </div>
+        <div class="faq-a">
+          어디에도 가지 않아요. 영상은 여러분 컴퓨터 안에서만 분석되고, 분석이 끝난 프레임은 그 즉시 메모리에서 사라져요. <strong>어떤 서버에도 전송되지 않고, 한 장도 저장되지 않아요.</strong>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="faq-q-mark">Q.</span>
+          잠시 쉬고 싶어요.
+        </div>
+        <div class="faq-a">
+          트레이 아이콘을 클릭해서 <strong>켜기 토글을 끄시면</strong> 돼요. 카메라 트랙이 완전히 해제되어 LED도 함께 꺼져요. 다시 켜는 것도 같은 방식이에요.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="faq-q-mark">Q.</span>
+          알림이 너무 자주 떠요 / 거의 안 떠요.
+        </div>
+        <div class="faq-a">
+          설정 창에서 <strong>감지 민감도</strong>를 조절해 주세요. <strong>여유롭게 / 보통 / 꼼꼼하게</strong> 중에서 고를 수 있어요. 잘 모르시겠다면 "보통"을 권해드려요.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="faq-q-mark">Q.</span>
+          부팅하면 자동으로 실행되게 하고 싶어요.
+        </div>
+        <div class="faq-a">
+          설정 창에서 <strong>컴퓨터 켤 때 자동 실행</strong> 토글을 켜 주세요.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="faq-q-mark">Q.</span>
+          여러 모니터를 쓰는데, 보조 모니터에서도 알림이 보이나요?
+        </div>
+        <div class="faq-a">
+          네, 모든 모니터에 동시에 표시돼요. 모니터를 새로 연결하거나 분리해도 자동으로 따라가요.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q">
+          <span class="faq-q-mark">Q.</span>
+          다른 사람이 잠깐 자리에 앉으면 어떻게 되나요?
+        </div>
+        <div class="faq-a">
+          쭉은 화면에서 가장 크게 잡힌 얼굴, 즉 카메라에 가장 가까운 분(=본인)을 기준으로 판단해요. 옆에 누가 잠깐 지나가도 영향받지 않아요.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer dark-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>6</span>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 7 · 개인정보 약속          ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="content-page bg-dark">
+    <div class="eyebrow">05 · 개인정보에 대한 약속</div>
+    <div class="page-title" style="font-size:28pt; margin-bottom:2mm;">개인정보에 대한 약속</div>
+    <p class="page-lead">쭉이 다루는 데이터는 단순해요. 이 약속은 쭉이 작동하는 모든 순간에 지켜져요.</p>
+
+    <div class="hairline"></div>
+
+    <div class="privacy-list">
+      <div class="privacy-item">
+        <span class="privacy-icon">🔒</span>
+        <div class="privacy-text">
+          카메라 영상은 <strong>여러분 컴퓨터 안에서만</strong> 분석돼요. 인터넷으로 어디에도 전송되지 않아요.
+        </div>
+      </div>
+
+      <div class="privacy-item">
+        <span class="privacy-icon">🗑️</span>
+        <div class="privacy-text">
+          분석이 끝난 프레임은 그 즉시 메모리에서 사라져요. <strong>단 한 장도 저장되지 않아요.</strong>
+        </div>
+      </div>
+
+      <div class="privacy-item">
+        <span class="privacy-icon">📋</span>
+        <div class="privacy-text">
+          컴퓨터에 남는 것은 <strong>자세 기준값(숫자 몇 개)</strong>과 <strong>일별 자세 통계(상태별 누적 시간)</strong>뿐이에요.
+        </div>
+      </div>
+
+      <div class="privacy-item">
+        <span class="privacy-icon">📷</span>
+        <div class="privacy-text">
+          일시정지 시에는 카메라 자체가 꺼져 LED도 함께 꺼져요.
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div class="privacy-footnote">
+      궁금한 점이 있으시면 <strong style="color:rgba(255,255,255,.65);">siwon.oh@plus-ex.com</strong>으로 언제든 문의해 주세요.
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>7</span>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════╗
+     ║  PAGE 8 · 문의 + 제거 + 마무리   ║
+     ╚═══════════════════════════════════╝ -->
+<div class="page">
+  <div class="content-page bg-white" style="padding-bottom:16mm;">
+    <div class="eyebrow">06 · 문의 · 제거</div>
+    <div class="page-title" style="font-size:28pt; margin-bottom:3mm;">더 궁금한 점이 있으시면</div>
+
+    <p style="font-size:11pt; line-height:1.6; color:var(--muted); margin-bottom:2mm;">
+      문제가 있거나 의견을 들려주고 싶으시면 아래로 메시지 주세요. 빠르게 답해드릴게요.
+    </p>
+    <a class="contact-email" href="mailto:siwon.oh@plus-ex.com">siwon.oh@plus-ex.com</a>
+    <p style="font-size:9.5pt; color:var(--muted); line-height:1.6;">"쭉이 자꾸 이상한 자세에서 떠요" 같은 사소한 피드백도 환영이에요. 쭉이 더 좋은 친구가 되는 데 큰 도움이 돼요.</p>
+
+    <div class="hairline" style="margin:7mm 0;"></div>
+
+    <div class="eyebrow" style="margin-bottom:3mm;">제거하기</div>
+
+    <div class="uninstall-block">
+      <div class="uninstall-title">프로그램 제거</div>
+      <div class="uninstall-step">시작 메뉴에서 <strong>"JJUUK 제거"</strong>를 검색해 실행하면 깔끔히 사라져요.</div>
+      <div style="height:3mm;"></div>
+      <div class="uninstall-title">자세 기록까지 완전히 지우려면</div>
+      <div class="uninstall-step">파일 탐색기 주소창에 <span class="code-tag">%APPDATA%\jjuuk</span>을 붙여 넣어 그 폴더도 함께 삭제해 주세요.</div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div class="closing-wrap" style="padding:0;">
+      <div style="display:flex; align-items:center; gap:4mm; padding:5mm; background:var(--parchment); border-radius:12px; width:100%;">
+        <span style="font-size:22pt;">🐢</span>
+        <div>
+          <div style="font-size:12pt; font-weight:600; color:var(--ink); letter-spacing:-0.3px; margin-bottom:1mm;">언젠가 다시 만나요.</div>
+          <div style="font-size:9.5pt; color:var(--muted); line-height:1.6;">그때까지 어깨 펴고 건강하게 지내세요.<br><span style="font-style:italic;">— 쭉(JJUUK) 드림</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer dark-footer">
+    <span>쭉(JJUUK) 사용 가이드</span>
+    <span>8</span>
+  </div>
+</div>
+
+</body>
+</html>

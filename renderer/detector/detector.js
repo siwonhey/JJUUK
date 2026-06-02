@@ -247,23 +247,14 @@ async function init() {
   try {
     setStatus('얼굴 인식을 준비하는 중이에요…');
     const fileset = await FilesetResolver.forVisionTasks(WASM_BASE);
-    // 일부 Windows GPU 드라이버에서 GPU delegate 가 createFromOptions 는 통과하지만
-    // 실제 detectForVideo 호출 시 조용히 빈 결과만 반환하는 케이스가 있어
-    // GPU 가 실패하면 CPU 로 한번 더 시도한다.
-    try {
-      detector = await FaceDetector.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
-        runningMode: 'VIDEO',
-        minDetectionConfidence: 0.5,
-      });
-    } catch (gpuErr) {
-      console.warn('[JJUUK] GPU delegate failed, falling back to CPU:', gpuErr);
-      detector = await FaceDetector.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
-        runningMode: 'VIDEO',
-        minDetectionConfidence: 0.5,
-      });
-    }
+    // BlazeFace 모델이 가벼워 Apple Silicon / 일반 CPU 에서 GPU 오프로드 이득보다
+    // GPU↔CPU 왕복 오버헤드가 더 크다. 실측 결과 총 CPU 사용량은 동일하고
+    // GPU 점유는 CPU 모드에서 35%p 낮아 배터리·발열 면에서 CPU 가 유리.
+    detector = await FaceDetector.createFromOptions(fileset, {
+      baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
+      runningMode: 'VIDEO',
+      minDetectionConfidence: 0.5,
+    });
   } catch (e) {
     console.error('[JJUUK] MediaPipe load failed', e);
     setStatus('얼굴 인식 준비에 실패했어요: ' + e.message, 'error');
@@ -340,6 +331,11 @@ function describeCameraError(e) {
       return {
         title: '카메라를 찾을 수 없어요',
         body: '연결된 웹캠이 없거나 인식되지 않았어요. 카메라가 잘 꽂혀 있는지 확인 후 다시 시도해 주세요.',
+      };
+    case 'CameraOffError':
+      return {
+        title: '카메라가 꺼져 있어요',
+        body: '카메라를 켜거나 연결한 뒤 다시 시도해 주세요.',
       };
     case 'NotReadableError':
     case 'TrackStartError':
@@ -446,6 +442,11 @@ function stopCamera() {
 }
 
 function beginCalibration() {
+  const tracks = video?.srcObject?.getVideoTracks?.() ?? [];
+  if (!tracks.length || tracks[0].readyState !== 'live') {
+    showCameraError(Object.assign(new Error('camera off'), { name: 'CameraOffError' }));
+    return;
+  }
   baseline = null;
   calibBuffer = [];
   calibFrameCount = 0;
@@ -678,6 +679,7 @@ window.jjuuk.onSetActive(async (v) => {
 window.jjuuk.onCalibrate(async () => {
   // 트레이/설정/첫 부팅(baseline 없음) → 자세 측정 시작.
   // intro 를 먼저 띄우고 (사용자 확인 후), ready 화면으로 진입.
+  window.jjuuk.notifyCalibStart();
   showLiveFeed();
   await showIntro();
   // init 가 아직 안 끝났다면 init 가 자체적으로 ready 로 갈 거라 여기선 가드.
