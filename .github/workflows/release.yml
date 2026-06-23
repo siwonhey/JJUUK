@@ -35,6 +35,8 @@ jobs:
           #   CSC_LINK            : .p12 인증서 (base64)
           #   CSC_KEY_PASSWORD    : .p12 비밀번호
           #   APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID : 공증(notarize)용
+          # 인증서(CSC_LINK)가 없으면 서명 탐색을 꺼서 unsigned로 빌드한다(없을 때 빌드 실패 방지).
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.CSC_LINK != '' }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
