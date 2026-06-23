@@ -4,6 +4,7 @@ const {
 } = require('electron');
 const path = require('path');
 const Store = require('electron-store');
+const { initAutoUpdater } = require('./updater');
 const {
   SENSITIVITY_PRESETS,
   RECALIBRATION_RECOMMEND_DAYS,
@@ -564,6 +565,8 @@ app.whenReady().then(() => {
   setupTray();
 
   applyOpenAtLogin(store.get('openAtLogin'));
+
+  initAutoUpdater();              // GitHub Releases 자동 업데이트 확인
 
   // 디스플레이 핫플러그/해상도 변경 대응
   screen.on('display-added', syncOverlayWindows);
