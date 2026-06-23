@@ -27,16 +27,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and publish
+      # 인증서(CSC_LINK) 시크릿 유무 판별. if: 에서는 secrets를 직접 못 읽어 output으로 우회.
+      - name: Detect macOS signing
+        id: macsign
+        shell: bash
+        run: echo "enabled=${{ secrets.CSC_LINK != '' }}" >> "$GITHUB_OUTPUT"
+
+      # 인증서 없음 → CSC_* 를 아예 전달하지 않고 unsigned(adhoc)로 빌드.
+      # (빈 문자열 CSC_LINK="" 를 넘기면 electron-builder가 서명 시도하다 실패하므로 키 자체를 생략)
+      - name: Build and publish (unsigned)
+        if: ${{ steps.macsign.outputs.enabled != 'true' }}
         run: npm run build -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # macOS 코드 서명을 켜려면 아래 시크릿을 저장소에 추가하면 자동 적용된다.
-          #   CSC_LINK            : .p12 인증서 (base64)
-          #   CSC_KEY_PASSWORD    : .p12 비밀번호
-          #   APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID : 공증(notarize)용
-          # 인증서(CSC_LINK)가 없으면 서명 탐색을 꺼서 unsigned로 빌드한다(없을 때 빌드 실패 방지).
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.CSC_LINK != '' }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # 인증서 있음 → 서명·공증해서 빌드. 아래 시크릿을 저장소에 추가하면 자동으로 이 경로를 탄다.
+      #   CSC_LINK(.p12 base64) / CSC_KEY_PASSWORD / APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID
+      - name: Build and publish (signed)
+        if: ${{ steps.macsign.outputs.enabled == 'true' }}
+        run: npm run build -- --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
